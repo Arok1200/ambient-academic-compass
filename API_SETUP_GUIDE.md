@@ -95,6 +95,9 @@ iOS Calendar integration requires native iOS Calendar access and is not availabl
 2. Add all the credentials you collected:
 
 ```bash
+# Backend API Configuration
+REACT_APP_API_BASE_URL=http://localhost:8080
+
 # Google Calendar API
 REACT_APP_GOOGLE_CLIENT_ID=xxxxx.apps.googleusercontent.com
 REACT_APP_GOOGLE_API_KEY=your-google-api-key
