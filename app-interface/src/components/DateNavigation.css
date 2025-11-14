@@ -1,0 +1,63 @@
+.date-navigation {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 0;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1.5rem 0 1.5rem;
+}
+
+.date-with-arrows {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  grid-column: 2;
+  justify-self: center;
+}
+
+.nav-arrow {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+}
+
+.nav-arrow:hover {
+  color: #666;
+}
+
+.current-date {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #000;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.view-dropdown {
+  border: 1px solid #000;
+  background: #fff;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 16px;
+  border-radius: 2px;
+  color: #000;
+  height: auto;
+  line-height: 1.2;
+  appearance: auto;
+  grid-column: 3;
+  justify-self: end;
+}
+
+.view-dropdown:focus {
+  outline: 2px solid #6C49D8;
+  outline-offset: 2px;
+}

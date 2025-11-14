@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ambient Desktop - Live Sync</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #1e1e1e;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Widgets Dock */
+    .dock {
+      position: fixed;
+      bottom: 120px;
+      left: 50px;
+      display: flex;
+      align-items: flex-end;
+      z-index: 10;
+    }
+
+    .widget {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative;
+      margin-left: -8px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.25);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .widget img {
+      width: 60%;
+      height: 60%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .calendar {
+      background: none;
+      box-shadow: none;
+      border: none;
+      width: auto;
+      height: auto;
+      transform: translateY(10px);
+      margin-right: 6px;
+    }
+
+    .calendar img {
+      width: 60px;
+      height: auto;
+    }
+
+    /* Widget positioning and sizing */
+    @keyframes bubbleBlink {
+      0%, 100% { transform: scale(1.3); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+      50% { transform: scale(1.45); box-shadow: 0 0 30px rgba(255,255,255,1); }
+    }
+
+    .widget.upcoming {
+      animation: bubbleBlink 2s infinite ease-in-out;
+    }
+
+    .widget.fade-out {
+      opacity: 0;
+      transform: scale(0.5) translateY(20px);
+      transition: all 0.5s ease;
+    }
+
+    .widget.hidden {
+      display: none;
+    }
+
+    /* Timeline Progress Bar */
+    .timeline-container {
+      position: fixed;
+      bottom: 40px;
+      left: 50px;
+      right: 50px;
+      height: 30px;
+      background: linear-gradient(to right, #667eea, #8b9ff5, #b8c4f9, #8b9ff5, #667eea);
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 5;
+    }
+
+    .event-marker {
+      position: absolute;
+      top: 0;
+      width: 3px;
+      height: 100%;
+      background: #000;
+      transform: translateX(-50%);
+    }
+
+    .event-label {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .current-time {
+      position: absolute;
+      top: -10px;
+      bottom: -10px;
+      width: 4px;
+      background: red;
+      transform: translateX(-50%);
+      z-index: 5;
+      box-shadow: 0 0 8px rgba(255,0,0,0.5);
+    }
+
+    .time-labels {
+      position: fixed;
+      bottom: 10px;
+      left: 50px;
+      right: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #ccc;
+    }
+
+    /* Popups */
+    .calendar-popup,
+    .widget-popup,
+    .confirm-popup,
+    .done-popup {
+      position: absolute;
+      display: none;
+      background: white;
+      border-radius: 10px;
+      padding: 12px 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+      z-index: 30;
+    }
+
+    .calendar-popup.show,
+    .widget-popup.show,
+    .confirm-popup.show,
+    .done-popup.show {
+      display: flex;
+    }
+
+    .calendar-popup {
+      flex-direction: column;
+      min-width: 220px;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .calendar-popup .close-btn {
+      position: absolute;
+      top: 6px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      color: black;
+    }
+
+    .calendar-popup .line {
+      margin: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: normal;
+    }
+
+    .calendar-popup img {
+      width: 22px;
+      height: 22px;
+    }
+
+    .calendar-popup .status-title {
+      text-decoration: underline;
+      font-weight: bold;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .widget-popup {
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: bold;
+      color: black;
+      min-width: 200px;
+    }
+
+    .widget-popup.blur {
+      filter: blur(4px);
+    }
+
+    .popup-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .check-box {
+      width: 28px;
+      height: 28px;
+      background: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    .check-box img {
+      width: 18px;
+      height: 18px;
+    }
+
+    .edit-icon {
+      width: 22px;
+      height: 22px;
+      margin-left: 8px;
+      cursor: pointer;
+    }
+
+    .confirm-popup {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      font-weight: bold;
+      padding: 15px 20px;
+    }
+
+    .confirm-buttons {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .confirm-btn {
+      padding: 6px 16px;
+      border-radius: 6px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .yes-btn {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .no-btn {
+      background: #f44336;
+      color: white;
+    }
+
+    .done-popup {
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      padding: 10px 16px;
+    }
+
+    .done-popup img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .loading {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      color: white;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="loading" id="loading">Loading data...</div>
+
+  <div class="dock" id="widgetDock">
+    <div class="widget calendar" id="calendarWidget">
+      <img src="./icons/calender.svg" alt="Calendar" />
+    </div>
+  </div>
+
+  <div class="timeline-container" id="timeline">
+    <div class="current-time" id="currentTime"></div>
+  </div>
+
+  <div class="time-labels">
+    <span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span>
+  </div>
+
+  <div class="calendar-popup" id="calendarPopup">
+    <div class="close-btn" id="calendarClose">×</div>
+    <div class="status-title">Today's Status:</div>
+    <div class="line"><img src="./icons/completed.svg" alt="Completed"> Completed: <span id="completedCount">0</span></div>
+    <div class="line"><img src="./icons/deadline.svg" alt="Deadline"> Deadlines left: <span id="deadlineCount">0</span></div>
+  </div>
+
+  <div class="widget-popup" id="widgetPopup">
+    <div class="popup-left">
+      <div class="check-box" id="checkBox">
+        <img src="./icons/check.svg" alt="Check" />
+      </div>
+      <span id="popupText"></span>
+    </div>
+    <img src="./icons/edit.svg" class="edit-icon" alt="Edit" />
+  </div>
+
+  <div class="confirm-popup" id="confirmPopup">
+    <div>Mark as done?</div>
+    <div class="confirm-buttons">
+      <button class="confirm-btn yes-btn" id="yesBtn">YES</button>
+      <button class="confirm-btn no-btn" id="noBtn">NO</button>
+    </div>
+  </div>
+
+  <div class="done-popup" id="donePopup">
+    <span id="doneText"></span>
+    <img src="./icons/done.svg" alt="Done" />
+  </div>
+
+  <script src="./desktop-sync.js"></script>
+</body>
+</html>

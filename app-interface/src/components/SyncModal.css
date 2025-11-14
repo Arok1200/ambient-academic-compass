@@ -1,0 +1,112 @@
+.sync-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sync-modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.sync-modal-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #000;
+  margin: 0 0 0.75rem 0;
+}
+
+.sync-modal-subtitle {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+}
+
+.sync-modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.sync-modal-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.sync-modal-option:hover {
+  background-color: #f5f5f5;
+}
+
+.sync-modal-option input[type="radio"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: pointer;
+  accent-color: #6C4DC5;
+}
+
+.sync-modal-option span {
+  font-size: 1rem;
+  color: #333;
+}
+
+.sync-modal-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.sync-modal-btn {
+  padding: 0.625rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid;
+}
+
+.sync-modal-confirm {
+  background-color: white;
+  color: #22c55e;
+  border-color: #22c55e;
+}
+
+.sync-modal-confirm:hover {
+  background-color: #22c55e;
+  color: white;
+}
+
+.sync-modal-cancel {
+  background-color: white;
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.sync-modal-cancel:hover {
+  background-color: #ef4444;
+  color: white;
+}
+
+.sync-modal-btn:active {
+  transform: scale(0.98);
+}
