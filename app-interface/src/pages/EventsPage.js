@@ -4,35 +4,27 @@ import { useData } from '../context/DataContext';
 import { API_BASE_URL } from '../services/api';
 import DateNavigation from '../components/DateNavigation';
 import AddButton from '../components/AddButton';
+import AddEventModal from '../components/AddEventModal';
+import { useState } from 'react';
 
 function EventsPage() {
   const { events, loading, loadData } = useData();
 
-  const handleAddEvent = async () => {
-    const title = prompt('Enter event title:');
-    if (!title) return;
-    
-    const description = prompt('Enter event description (optional):');
-    const startTime = prompt('Enter start time (YYYY-MM-DDTHH:MM:SS):');
-    const endTime = prompt('Enter end time (YYYY-MM-DDTHH:MM:SS):');
-    const location = prompt('Enter location (optional):');
-    
-    const newEvent = {
-      title,
-      description: description || '',
-      startTime,
-      endTime,
-      location: location || '',
-      completed: false
-    };
-    
+  const [showModal, setShowModal] = useState(false);
+
+  const handleAddEvent = () => {
+    setShowModal(true);
+  };
+
+  const handleSubmitEvent = async (newEvent) => {
     try {
       await axios.post(`${API_BASE_URL}/events`, newEvent);
-      await loadData(); // Refresh the data from backend
-      alert('Event added successfully!');
-    } catch (error) {
-      console.error('Failed to add event:', error);
-      alert('Failed to add event. Please try again.');
+      await loadData();
+      alert("Event added!");
+      setShowModal(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add event.");
     }
   };
 
@@ -69,6 +61,12 @@ function EventsPage() {
       </div>
       
       <AddButton label="Add Event +" onClick={handleAddEvent} />
+      {showModal && (
+        <AddEventModal
+          onClose={() => setShowModal(false)}
+          onSubmit={handleSubmitEvent}
+        />
+      )}
     </div>
   );
 }
