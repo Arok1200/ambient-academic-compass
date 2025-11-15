@@ -21,7 +21,6 @@ function EventsPage() {
 
   // Selected date
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const formattedSelectedDate = selectedDate.toISOString().slice(0, 10);
 
   // Add event
   const handleSubmitEvent = async (newEvent) => {

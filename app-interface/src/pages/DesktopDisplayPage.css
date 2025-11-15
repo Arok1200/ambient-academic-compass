@@ -66,19 +66,18 @@
 
 .disable-btn {
   display: block;
-  margin: 0 auto;
-  padding: 8px 24px;
+  margin: 0.8rem auto;
+  padding: 0.3rem 1rem;
+  border: 5px solid #999;
   background: #fff;
-  border: 1px solid #000;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 0;
 }
 
 .disable-btn:hover {
-  background: #f0f0f0;
+  background: #f5f5f5;
 }
 
 .view-desktop-btn {

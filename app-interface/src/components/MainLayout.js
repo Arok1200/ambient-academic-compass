@@ -172,7 +172,7 @@ function MainLayout({ children }) {
     
     const now = new Date();
     return deadlines
-      .filter(d => new Date(d.dueAt) > now && !hiddenWidgets.has(d.id))
+      .filter(d => new Date(d.dueAt) > now && !hiddenWidgets.has(d.id) && !d.completed)
       .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
       .slice(0, 5);
   };

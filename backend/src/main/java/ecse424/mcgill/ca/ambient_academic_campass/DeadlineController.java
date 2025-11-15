@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +29,22 @@ public class DeadlineController {
     @PostMapping
     public Deadline createDeadline(@RequestBody Deadline deadline) {
         return deadlineRepository.save(deadline);
+    }
+
+    @PutMapping("/{id}")
+    public Deadline updateDeadline(@PathVariable Long id, @RequestBody Deadline updatedDeadline) {
+        return deadlineRepository.findById(id)
+            .map(deadline -> {
+                deadline.setTitle(updatedDeadline.getTitle());
+                deadline.setDescription(updatedDeadline.getDescription());
+                deadline.setDueAt(updatedDeadline.getDueAt());
+                deadline.setCompleted(updatedDeadline.isCompleted());
+                deadline.setPinned(updatedDeadline.isPinned());
+                deadline.setIconIndex(updatedDeadline.getIconIndex());
+                deadline.setColorIndex(updatedDeadline.getColorIndex());
+                return deadlineRepository.save(deadline);
+            })
+            .orElseThrow(() -> new RuntimeException("Deadline not found with id: " + id));
     }
 
     @DeleteMapping("/{id}")

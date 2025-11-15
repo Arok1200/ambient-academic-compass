@@ -1,28 +1,20 @@
 :root {
   --border-color: #000;
   --section-header-bg: #E9E9E9;
-  --tab-bg: #f0f0f0;
-MainLayout.css - Unified Frame Design
-Matches Figma reference with:
-- Single 2px black border wrapping header + tabs + content
-- Full-width tab bar as a grey strip
-- Equal-height left/right panels
-- 1px black dividers between sections
-- Light grey section headers (#E9E9E9)
-*/
-
-:root {
-  --border-color: #000;
-  --section-header-bg: #E9E9E9;
   --tab-bg: #E6E6E6;
   --tab-active-bg: #CFCFCF;
   --header-height: 70px;
   --tab-height: 50px;
-  --widget-pink: #F3B1D1;
-  --widget-gray: #BDBDBD;
-  --widget-green: #6FCF97;
-  --widget-purple: #B298F5;
-  --widget-blue: #9AD1E3;
+  --widget-color-1: #FFADAD;
+  --widget-color-2: #FFD6A5;
+  --widget-color-3: #FDFFB6;
+  --widget-color-4: #CAFFBF;
+  --widget-color-5: #7BAD91;
+  --widget-color-6: #9BF6FF;
+  --widget-color-7: #A0C4FF;
+  --widget-color-8: #BDB2FF;
+  --widget-color-9: #FFC6FF;
+  --widget-color-10: #D8D8D8;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -94,7 +86,7 @@ Matches Figma reference with:
 .sync-frame {
   width: 80px;
   height: 80px;
-  position: absolute;
+  position: relative;
   top: 0;
   left: 0;
 }
@@ -663,15 +655,17 @@ button.add-event:hover {
   bottom: 15%;
   left: 3%;
 }
-  bottom: 25%;
-  left: 12%;
-}
 
-.widget-circle.pink { background: var(--widget-pink); }
-.widget-circle.gray { background: var(--widget-gray); }
-.widget-circle.green { background: var(--widget-green); }
-.widget-circle.purple { background: var(--widget-purple); }
-.widget-circle.blue { background: var(--widget-blue); }
+.widget-circle.color-1 { background: var(--widget-color-1); }
+.widget-circle.color-2 { background: var(--widget-color-2); }
+.widget-circle.color-3 { background: var(--widget-color-3); }
+.widget-circle.color-4 { background: var(--widget-color-4); }
+.widget-circle.color-5 { background: var(--widget-color-5); }
+.widget-circle.color-6 { background: var(--widget-color-6); }
+.widget-circle.color-7 { background: var(--widget-color-7); }
+.widget-circle.color-8 { background: var(--widget-color-8); }
+.widget-circle.color-9 { background: var(--widget-color-9); }
+.widget-circle.color-10 { background: var(--widget-color-10); }
 
 .sidebar-btn {
   padding: 0.2rem 1rem;
@@ -909,16 +903,6 @@ button.add-event:hover {
   height: 24px;
 }
 
-.sync-frame {
-  width: 32px;
-  height: 32px;
-}
-
-.sync-icon-img {
-  width: 20px;
-  height: 20px;
-}
-
 .profile-upload {
   cursor: pointer;
   display: flex;
@@ -994,24 +978,44 @@ button.add-event:hover {
   height: 40px;
 }
 
-.widget-circle.pink {
-  background-color: var(--widget-pink);
+.widget-circle.color-1 {
+  background-color: var(--widget-color-1);
 }
 
-.widget-circle.gray {
-  background-color: var(--widget-gray);
+.widget-circle.color-2 {
+  background-color: var(--widget-color-2);
 }
 
-.widget-circle.green {
-  background-color: var(--widget-green);
+.widget-circle.color-3 {
+  background-color: var(--widget-color-3);
 }
 
-.widget-circle.purple {
-  background-color: var(--widget-purple);
+.widget-circle.color-4 {
+  background-color: var(--widget-color-4);
 }
 
-.widget-circle.blue {
-  background-color: var(--widget-blue);
+.widget-circle.color-5 {
+  background-color: var(--widget-color-5);
+}
+
+.widget-circle.color-6 {
+  background-color: var(--widget-color-6);
+}
+
+.widget-circle.color-7 {
+  background-color: var(--widget-color-7);
+}
+
+.widget-circle.color-8 {
+  background-color: var(--widget-color-8);
+}
+
+.widget-circle.color-9 {
+  background-color: var(--widget-color-9);
+}
+
+.widget-circle.color-10 {
+  background-color: var(--widget-color-10);
 }
 
 .no-data-message {
