@@ -1,40 +1,35 @@
 import React, { useState } from 'react';
 import { NOTE_COLORS } from '../constants/colors';
 import AddButton from '../components/AddButton';
+import { NoteModal } from '../components/modals';
 
 function NotesPage() {
   const [notes, setNotes] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [editingNote, setEditingNote] = useState(null);
 
-  const handleAddNote = () => {
-    const content = prompt('Enter note content:');
-    if (!content) return;
-    
-    const author = prompt('Enter your name (optional):', 'Anonymous');
-    
-    const newNote = {
-      id: Date.now(),
-      content: content.trim(),
-      author: author?.trim() || 'Anonymous',
-      colorIndex: notes.length % 6 // Cycle through 6 colors
-    };
-    
-    setNotes([...notes, newNote]);
+  const handleSubmitNote = (formData) => {
+    if (editingNote) {
+      setNotes(notes.map(n => 
+        n.id === editingNote.id 
+          ? { ...n, content: formData.text, colorIndex: formData.colorIndex }
+          : n
+      ));
+      setEditingNote(null);
+    } else {
+      const newNote = {
+        id: Date.now(),
+        content: formData.text,
+        author: 'Anonymous',
+        colorIndex: formData.colorIndex
+      };
+      setNotes([...notes, newNote]);
+    }
   };
 
-  const handleEditNote = (id) => {
-    const note = notes.find(n => n.id === id);
-    if (!note) return;
-    
-    const newContent = prompt('Edit note content:', note.content);
-    if (newContent === null) return;
-    
-    const newAuthor = prompt('Edit author name:', note.author);
-    
-    setNotes(notes.map(n => 
-      n.id === id 
-        ? { ...n, content: newContent.trim(), author: newAuthor?.trim() || note.author }
-        : n
-    ));
+  const handleEditNote = (note) => {
+    setEditingNote(note);
+    setShowModal(true);
   };
 
   const handleDeleteNote = (id) => {
@@ -73,7 +68,7 @@ function NotesPage() {
                   <div className="note-actions">
                     <button 
                       className="note-action-btn"
-                      onClick={() => handleEditNote(note.id)}
+                      onClick={() => handleEditNote(note)}
                       title="Edit note"
                     >
                       ✏️
@@ -93,7 +88,14 @@ function NotesPage() {
         )}
       </div>
       
-      <AddButton label="Add Note +" onClick={handleAddNote} />
+      <AddButton label="Add Note +" onClick={() => { setEditingNote(null); setShowModal(true); }} />
+
+      <NoteModal
+        isOpen={showModal}
+        onClose={() => { setShowModal(false); setEditingNote(null); }}
+        onSubmit={handleSubmitNote}
+        initialData={editingNote ? { text: editingNote.content, colorIndex: editingNote.colorIndex } : null}
+      />
     </div>
   );
 }

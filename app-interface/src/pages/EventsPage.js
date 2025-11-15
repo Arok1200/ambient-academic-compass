@@ -1,38 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { useData } from '../context/DataContext';
 import { API_BASE_URL } from '../services/api';
 import DateNavigation from '../components/DateNavigation';
 import AddButton from '../components/AddButton';
+import { EventModal } from '../components/modals';
 
 function EventsPage() {
   const { events, loading, loadData } = useData();
+  const [showModal, setShowModal] = useState(false);
 
-  const handleAddEvent = async () => {
-    const title = prompt('Enter event title:');
-    if (!title) return;
-    
-    const description = prompt('Enter event description (optional):');
-    const startTime = prompt('Enter start time (YYYY-MM-DDTHH:MM:SS):');
-    const endTime = prompt('Enter end time (YYYY-MM-DDTHH:MM:SS):');
-    const location = prompt('Enter location (optional):');
+  const handleSubmitEvent = async (formData) => {
+    const startTime = `${formData.eventDate}T${formData.startTime}:00`;
+    const endTime = `${formData.eventDate}T${formData.endTime}:00`;
     
     const newEvent = {
-      title,
-      description: description || '',
+      title: formData.title,
+      description: '',
       startTime,
       endTime,
-      location: location || '',
+      location: '',
       completed: false
     };
     
     try {
       await axios.post(`${API_BASE_URL}/events`, newEvent);
-      await loadData(); // Refresh the data from backend
+      await loadData();
       alert('Event added successfully!');
     } catch (error) {
       console.error('Failed to add event:', error);
-      alert('Failed to add event. Please try again.');
+      alert('Failed to add event. Please check the date/time format and try again.');
     }
   };
 
@@ -68,7 +65,13 @@ function EventsPage() {
         </div>
       </div>
       
-      <AddButton label="Add Event +" onClick={handleAddEvent} />
+      <AddButton label="Add Event +" onClick={() => setShowModal(true)} />
+
+      <EventModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSubmit={handleSubmitEvent}
+      />
     </div>
   );
 }

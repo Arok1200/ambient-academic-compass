@@ -14,36 +14,25 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/events")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*")  // allows frontend requests from anywhere
 public class EventController {
 
     @Autowired
     private EventRepository eventRepository;
 
+    // Get all events
     @GetMapping
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
 
+    // Create a new event
     @PostMapping
     public Event createEvent(@RequestBody Event event) {
         return eventRepository.save(event);
     }
 
-    @org.springframework.web.bind.annotation.PutMapping("/{id}")
-    public Event updateEvent(@PathVariable Long id, @RequestBody Event eventDetails) {
-        Event event = eventRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-        
-        event.setTitle(eventDetails.getTitle());
-        event.setDescription(eventDetails.getDescription());
-        event.setStartTime(eventDetails.getStartTime());
-        event.setEndTime(eventDetails.getEndTime());
-        event.setCompleted(eventDetails.isCompleted());
-        
-        return eventRepository.save(event);
-    }
-
+    // Delete an event by ID
     @DeleteMapping("/{id}")
     public void deleteEvent(@PathVariable Long id) {
         eventRepository.deleteById(id);

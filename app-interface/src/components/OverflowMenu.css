@@ -1,0 +1,35 @@
+.overflow-menu {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 44px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  z-index: 100;
+}
+
+.overflow-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+  color: #000;
+}
+
+.overflow-menu-item:hover {
+  background-color: #F5F5F5;
+}
+
+.overflow-menu-item svg {
+  display: block;
+}

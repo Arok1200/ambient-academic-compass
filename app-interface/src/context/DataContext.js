@@ -17,6 +17,7 @@ export const DataProvider = ({ children }) => {
   const [deadlines, setDeadlines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [hiddenWidgets, setHiddenWidgets] = useState(new Set());
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -45,7 +46,9 @@ export const DataProvider = ({ children }) => {
     error,
     loadData,
     setEvents,
-    setDeadlines
+    setDeadlines,
+    hiddenWidgets,
+    setHiddenWidgets
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

@@ -7,6 +7,7 @@ import SyncModal from './SyncModal';
 import googleCalendarService from '../services/googleCalendarService';
 import notionService from '../services/notionService';
 import { GOOGLE_CONFIG, NOTION_CONFIG, IOS_CALENDAR_NOTE } from '../config/apiConfig';
+import { WIDGET_COLOR_DETAILS } from '../constants/colors';
 import axios from 'axios';
 
 import applogo from '../assets/icons/applogo.svg';
@@ -14,6 +15,11 @@ import settings from '../assets/icons/settings.svg';
 import syncFrame from '../assets/icons/sync-frame.svg';
 import syncIcon from '../assets/icons/sync-icon.jpg';
 import helpIcon from '../assets/icons/help.svg';
+import assignmentIcon from '../assets/icons/assignment.svg';
+import quizIcon from '../assets/icons/quiz.svg';
+import studyingIcon from '../assets/icons/studying.svg';
+import cleanIcon from '../assets/icons/clean.svg';
+import groupDiscussionIcon from '../assets/icons/group-discussion.svg';
 
 function MainLayout({ children }) {
   const [profilePic, setProfilePic] = useState(null);
@@ -22,7 +28,7 @@ function MainLayout({ children }) {
   const [syncing, setSyncing] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const location = useLocation();
-  const { events, deadlines, loadData } = useData();
+  const { events, deadlines, loadData, hiddenWidgets } = useData();
 
   useEffect(() => {
     loadData();
@@ -66,7 +72,6 @@ function MainLayout({ children }) {
 
   const syncFromGoogle = async () => {
     try {
-      // Check if credentials are configured
       if (!GOOGLE_CONFIG.apiKey || GOOGLE_CONFIG.apiKey === 'your-google-api-key' ||
           !GOOGLE_CONFIG.clientId || GOOGLE_CONFIG.clientId === 'your-google-client-id.apps.googleusercontent.com') {
         throw new Error('Google Calendar API credentials not configured. Please add REACT_APP_GOOGLE_CLIENT_ID and REACT_APP_GOOGLE_API_KEY to your .env file. See API_SETUP_GUIDE.md for instructions.');
@@ -109,7 +114,6 @@ function MainLayout({ children }) {
 
   const syncFromNotion = async () => {
     try {
-      // Check if credentials are configured
       if (!NOTION_CONFIG.clientId || NOTION_CONFIG.clientId === 'your-notion-client-id' ||
           !NOTION_CONFIG.clientSecret || NOTION_CONFIG.clientSecret === 'your-notion-client-secret') {
         throw new Error('Notion API credentials not configured. Please add REACT_APP_NOTION_CLIENT_ID and REACT_APP_NOTION_CLIENT_SECRET to your .env file. See API_SETUP_GUIDE.md for instructions.');
@@ -122,7 +126,7 @@ function MainLayout({ children }) {
           NOTION_CONFIG.clientId,
           NOTION_CONFIG.redirectUri
         );
-        return; // OAuth will redirect, so we return here
+        return;
       }
 
       const databases = await notionService.searchDatabases();
@@ -168,7 +172,7 @@ function MainLayout({ children }) {
     
     const now = new Date();
     return deadlines
-      .filter(d => new Date(d.dueAt) > now)
+      .filter(d => new Date(d.dueAt) > now && !hiddenWidgets.has(d.id))
       .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
       .slice(0, 5);
   };
@@ -193,7 +197,6 @@ function MainLayout({ children }) {
     const hours = eventDate.getHours();
     const minutes = eventDate.getMinutes();
     const totalMinutes = hours * 60 + minutes;
-    // Position as percentage of the day (0-1440 minutes)
     return (totalMinutes / 1440) * 100;
   };
 
@@ -271,14 +274,24 @@ function MainLayout({ children }) {
                   <div className="widgets-display">
                     {upcomingDeadlines.length > 0 ? (
                       upcomingDeadlines.map((deadline, index) => {
-                        const colors = ['pink', 'gray', 'green', 'purple', 'blue'];
-                        const sizes = ['small', 'medium', 'large', 'medium', 'small'];
+                        const colorDetail = WIDGET_COLOR_DETAILS[deadline.colorIndex || 0];
+                        const icons = [assignmentIcon, quizIcon, studyingIcon, cleanIcon, groupDiscussionIcon];
+                        const iconSrc = icons[deadline.iconIndex || 0];
+                        const sizes = ['largest', 'large', 'medium', 'small', 'smallest'];
+                        const size = sizes[Math.min(index, sizes.length - 1)];
+                        
                         return (
                           <div 
                             key={deadline.id || index} 
-                            className={`widget-circle ${colors[index % colors.length]} ${sizes[index % sizes.length]}`}
+                            className={`widget-box ${size}`}
+                            style={{
+                              backgroundColor: colorDetail.bg,
+                              border: `3px solid ${colorDetail.border}`
+                            }}
                             title={`${deadline.title} - Due: ${new Date(deadline.dueAt).toLocaleDateString()}`}
-                          ></div>
+                          >
+                            <img src={iconSrc} alt={deadline.title} />
+                          </div>
                         );
                       })
                     ) : (

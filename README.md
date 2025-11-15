@@ -26,7 +26,7 @@ ambient-academic-compass/
 └── API_SETUP_GUIDE.md    # Guide for setting up Google Calendar & Notion APIs
 ```
 
-## Prerequisites
+## initial step
 
 - **Frontend**: Node.js 16+ and npm
 - **Backend**: Java 17+ and Maven
@@ -128,24 +128,6 @@ cd backend
 - `PUT /deadlines/{id}` - Update deadline
 - `DELETE /deadlines/{id}` - Delete deadline
 
-## Team
 
-**ECSE 424 - Human Computer Interaction**  
-McGill University
-
-- Kaitlyn Pereira - API Integration & Backend
-- Arok Khot Bul - Frontend Design & Visualization
-- Anum Rehan - User Testing & Usability
-
-## Project Goals
-
-1. **Ambient Awareness**: Provide subtle visual cues for deadlines without intrusive notifications
-2. **Reduced Cognitive Load**: Consolidate tasks from multiple sources into unified visualizations
-3. **Desktop Integration**: Live desktop display showing widgets, timeline, and calendar
-4. **Seamless Sync**: Import events from Google Calendar and Notion automatically
-
-## License
-
-Academic/Course Project - ECSE 424
 
 

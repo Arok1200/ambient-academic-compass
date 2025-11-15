@@ -18,6 +18,8 @@ public class Deadline {
     private LocalDateTime dueAt;
     private boolean completed;
     private boolean pinned;
+    private Integer iconIndex;
+    private Integer colorIndex;
 
     public Deadline() {}
 
@@ -27,6 +29,8 @@ public class Deadline {
         this.dueAt = dueAt;
         this.completed = completed;
         this.pinned = pinned;
+        this.iconIndex = 0;
+        this.colorIndex = 0;
     }
 
     public Long getId() {
@@ -71,5 +75,21 @@ public class Deadline {
 
     public void setPinned(boolean pinned) {
         this.pinned = pinned;
+    }
+
+    public Integer getIconIndex() {
+        return iconIndex;
+    }
+
+    public void setIconIndex(Integer iconIndex) {
+        this.iconIndex = iconIndex;
+    }
+
+    public Integer getColorIndex() {
+        return colorIndex;
+    }
+
+    public void setColorIndex(Integer colorIndex) {
+        this.colorIndex = colorIndex;
     }
 }

@@ -1,0 +1,132 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-card {
+  background: white;
+  border: 1px solid #CBC8D4;
+  border-radius: 24px;
+  padding: 32px;
+  width: 500px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #000;
+  margin: 0 0 24px 0;
+  text-align: left;
+}
+
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.modal-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  min-width: 100px;
+  text-align: left;
+}
+
+.modal-input,
+.modal-textarea {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #CBC8D4;
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.modal-input:focus,
+.modal-textarea:focus {
+  outline: none;
+  border-color: #999;
+}
+
+.modal-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modal-btn {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: white;
+}
+
+.modal-btn-cancel {
+  border: 2px solid #E53935;
+  color: #E53935;
+}
+
+.modal-btn-cancel:hover {
+  background-color: #FFEBEE;
+}
+
+.modal-btn-confirm {
+  border: 2px solid #4CAF50;
+  color: #4CAF50;
+}
+
+.modal-btn-confirm:hover {
+  background-color: #E8F5E9;
+}
+
+.modal-center-content {
+  text-align: center;
+}
+
+.modal-center-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 12px;
+}
+
+.modal-center-text {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.modal-center-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
