@@ -108,16 +108,6 @@
   align-items: center;
 }
 
-.menu-container::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: -100vh;
-  bottom: -100vh;
-  width: 1px;
-  background: #000;
-}
-
 .deadline-menu-btn {
   width: 34px;
   height: 34px;

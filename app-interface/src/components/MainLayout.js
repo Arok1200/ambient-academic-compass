@@ -28,7 +28,7 @@ function MainLayout({ children }) {
   const [syncing, setSyncing] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const location = useLocation();
-  const { events, deadlines, loadData } = useData();
+  const { events, deadlines, loadData, hiddenWidgets } = useData();
 
   useEffect(() => {
     loadData();
@@ -172,7 +172,7 @@ function MainLayout({ children }) {
     
     const now = new Date();
     return deadlines
-      .filter(d => new Date(d.dueAt) > now && !d.completed)
+      .filter(d => !hiddenWidgets.has(d.id) && new Date(d.dueAt) > now && !d.completed)
       .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
       .slice(0, 5);
   };

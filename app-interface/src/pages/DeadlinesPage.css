@@ -54,6 +54,18 @@
 .deadlines-list-items {
   display: flex;
   flex-direction: column;
+  position: relative;
+}
+
+.deadlines-list-items::before {
+  content: '';
+  position: absolute;
+  right: 152px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: #000;
+  z-index: 1;
 }
 
 .deadlines-message {
