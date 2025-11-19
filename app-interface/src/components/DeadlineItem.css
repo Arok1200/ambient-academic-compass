@@ -140,6 +140,7 @@
   white-space: nowrap;
   transition: all 0.2s;
   min-width: 125px;
+  margin-left: 10px;
 }
 
 .deadline-widget-btn.show-widget {
@@ -154,4 +155,19 @@
 
 .deadline-widget-btn.show-widget:hover {
   background-color: #F0F0F0;
+}
+
+.deadline-icon-btn {
+  background: none;      /* remove default background */
+  border: none;          /* remove default border */
+  padding: 4px 4px;
+  margin: 0;             /* optional, remove margin */
+  cursor: pointer;       /* pointer cursor on hover */
+  display: inline-flex;  /* ensures proper icon alignment */
+  align-items: center;   /* vertical align */
+  justify-content: center; /* horizontal align */
+}
+
+.deadline-icon-btn:focus {
+  outline: none;         /* remove the focus outline */
 }

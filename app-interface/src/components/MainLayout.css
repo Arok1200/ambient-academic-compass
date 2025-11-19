@@ -1111,3 +1111,56 @@ button.add-event:hover {
 .view-desktop-btn:hover {
   background-color: #5568d3;
 }
+
+/* Tooltip styles for small info icons next to section headers */
+.tooltip-container {
+  display: inline-block;
+  position: relative;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+.tooltip-icon {
+  width: 16px;
+  height: 16px;
+  color: #666;
+  cursor: default;
+  display: inline-block;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  width: max-content;
+  max-width: 220px;
+  background-color: rgba(0,0,0,0.85);
+  color: #fff;
+  text-align: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 50;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.tooltip-text::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0,0,0,0.85) transparent transparent transparent;
+}
+
+.tooltip-container:hover .tooltip-text,
+.tooltip-container:focus-within .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}

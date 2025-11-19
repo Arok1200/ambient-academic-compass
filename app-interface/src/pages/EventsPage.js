@@ -8,8 +8,22 @@ import AddEventModal from "../components/AddEventModal";
 import EditEventModal from "../components/EditEventModal";
 import DeleteEventModal from "../components/DeleteEventModal";
 import "./EventsPage.css";
-import { FaTrash } from 'react-icons/fa'
-import { FaPen } from 'react-icons/fa'
+
+// Edit pencil
+const EditIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+);
+
+// Trash can
+const DeleteIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
 
 function EventsPage() {
   const { events, loading, loadData } = useData();
@@ -68,54 +82,49 @@ function EventsPage() {
     );
   });
 
-  return (
-    <div className="events-page-container">
-      <DateNavigation
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-      />
+  const formatDateTime = (startTime, endTime) => {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+    return `${start.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} - ` +
+           `${start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} ` +
+           `to ${end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+  };
 
-      {/* Events Table */}
-      <div className="events-table">
+  return (
+    <div className="events-page">
+      <DateNavigation selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
+
+      <div className="events-list">
         {loading && <p className="events-message">Loading events...</p>}
 
         {!loading && eventsForSelectedDay.length === 0 && (
           <p className="events-message">No events for this day.</p>
         )}
 
-        {!loading &&
-          eventsForSelectedDay.map((event) => (
-            <div key={event.id} className="events-table-row">
-              {/* Times */}
-              <div className="events-table-cell times">
-                {new Date(event.startTime).toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                })}{" "}
-                -{" "}
-                {new Date(event.endTime).toLocaleTimeString([], {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hour12: true,
-                })}
-              </div>
-
-              {/* Title */}
-              <div className="events-table-cell title">{event.title}</div>
-
-              {/* Actions */}
-              <div className="events-table-cell actions">
-                <button onClick={() => setEditEvent(event)} title="Edit">
-                  <FaPen size={18} color="#474747" />
-                </button>
-                <button onClick={() => setDeleteEvent(event)} title="Delete">
-                  <FaTrash size={18} color="#474747"/>
-                </button>
-              </div>
+        {!loading && eventsForSelectedDay.length > 0 && (
+          <div className="deadlines-content">
+            <div className="deadlines-list-bordered">
+              {eventsForSelectedDay.map((event) => (
+                <div key={event.id} className="event-row">
+                  <div className="event-info">
+                    <div className="event-title">{event.title}</div>
+                    <div className="event-datetime">{formatDateTime(event.startTime, event.endTime)}</div>
+                  </div>
+                  <div className="event-actions">
+                    <button onClick={() => setEditEvent(event)} className="deadline-icon-btn" title="Edit">
+                      <EditIcon />
+                    </button>
+                    <button onClick={() => setDeleteEvent(event)} className="deadline-icon-btn" title="Delete">
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          </div>
+        )}
       </div>
+
 
       {/* Add Event Button */}
       <AddButton label="Add Event +" onClick={() => setShowAddModal(true)} />
