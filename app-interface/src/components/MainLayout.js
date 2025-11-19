@@ -200,6 +200,12 @@ function MainLayout({ children }) {
     return (totalMinutes / 1440) * 100;
   };
 
+  const calculateEventWidth = (startTime, endTime) => {
+    const startPos = calculateEventPosition(startTime);
+    const endPos = calculateEventPosition(endTime);
+    return endPos - startPos;
+  };
+
   const upcomingDeadlines = getUpcomingDeadlines();
   const todayEvents = getTodayEvents();
 
@@ -317,23 +323,31 @@ function MainLayout({ children }) {
                         <div className="timeline-bar">
                           {todayEvents.map((event, index) => {
                             const position = calculateEventPosition(event.startTime);
-                            const eventTime = new Date(event.startTime);
-                            const timeStr = eventTime.toLocaleTimeString('en-US', { 
+                            const width = calculateEventWidth(event.startTime, event.endTime);
+                            const eventStart = new Date(event.startTime);
+                            const eventEnd = new Date(event.endTime);
+                            const startStr = eventStart.toLocaleTimeString('en-US', { 
                               hour: 'numeric', 
                               minute: '2-digit',
                               hour12: true 
                             });
+                            const endStr = eventEnd.toLocaleTimeString('en-US', { 
+                              hour: 'numeric', 
+                              minute: '2-digit',
+                              hour12: true 
+                            });
+                            const isEven = index % 2 === 0;
                             
                             return (
                               <div 
                                 key={event.id || index}
-                                className="timeline-event"
-                                style={{ left: `${position}%` }}
-                                title={`${event.title} at ${timeStr}`}
+                                className={`timeline-event ${isEven ? 'label-above' : 'label-below'}`}
+                                style={{ left: `${position}%`, width: `${width}%` }}
+                                title={`${event.title}: ${startStr} - ${endStr}`}
                               >
                                 <div className="timeline-marker"></div>
                                 <div className="timeline-label">
-                                  <div className="event-time">{timeStr}</div>
+                                  <div className="event-time">{startStr} - {endStr}</div>
                                   <div className="event-name">{event.title}</div>
                                 </div>
                               </div>
