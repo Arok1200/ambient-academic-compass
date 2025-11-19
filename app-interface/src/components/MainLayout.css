@@ -572,9 +572,13 @@ button.add-event:hover {
 }
 
 .widgets-display {
-  position: relative;
-  width: 180px;
-  height: 180px;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem;
+  min-height: 80px;
   margin: 0.25rem auto;
 }
 
@@ -589,7 +593,7 @@ button.add-event:hover {
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   transition: transform 0.2s ease;
-  position: absolute;
+  flex-shrink: 0;
 }
 
 .widget-box:hover {
@@ -605,55 +609,26 @@ button.add-event:hover {
 .widget-box.largest {
   width: 65px;
   height: 65px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 5;
-}
-
-.widget-box.largest:hover {
-  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .widget-box.large {
+  width: 55px;
+  height: 55px;
+}
+
+.widget-box.medium {
   width: 50px;
   height: 50px;
 }
 
-.widget-box.large:nth-child(2) {
-  top: 3%;
-  left: 50%;
-  transform: translate(-50%, 0);
-}
-
-.widget-box.medium {
-  width: 42px;
-  height: 42px;
-}
-
-.widget-box.medium:nth-child(3) {
-  top: 35%;
-  right: 1%;
-}
-
 .widget-box.small {
-  width: 35px;
-  height: 35px;
-}
-
-.widget-box.small:nth-child(4) {
-  bottom: 15%;
-  right: 3%;
+  width: 45px;
+  height: 45px;
 }
 
 .widget-box.smallest {
-  width: 30px;
-  height: 30px;
-}
-
-.widget-box.smallest:nth-child(5) {
-  bottom: 15%;
-  left: 3%;
+  width: 40px;
+  height: 40px;
 }
 
 .widget-circle.color-1 { background: var(--widget-color-1); }
