@@ -43,43 +43,42 @@ function DeadlineModal({ isOpen, onClose, onSubmit, initialData = null }) {
       onCancel={handleClose}
       confirmText={initialData ? "Save" : "Confirm"}
     >
-      <div className="modal-row">
-        <label className="modal-label">Title</label>
+      <div className="input-row">
+        <label className="modal-label">Title:</label>
         <input
           type="text"
-          className="modal-input"
           value={formData.title}
           onChange={(e) => setFormData({...formData, title: e.target.value})}
           placeholder="Enter deadline title"
         />
       </div>
 
-      <div className="modal-row">
-        <label className="modal-label">Date</label>
+      <div className="input-row">
+        <label className="modal-label">Date:</label>
         <DatePicker
           value={formData.dueDate}
           onChange={(date) => setFormData({...formData, dueDate: date})}
         />
       </div>
 
-      <div className="modal-row">
-        <label className="modal-label">Time</label>
+      <div className="input-row">
+        <label className="modal-label">Time:</label>
         <TimePicker
           value={formData.dueTime}
           onChange={(time) => setFormData({...formData, dueTime: time})}
         />
       </div>
 
-      <div className="modal-row">
-        <label className="modal-label">Color</label>
+      <div className="input-row">
+        <label className="modal-label">Color:</label>
         <ColorSelector
           selectedIndex={formData.colorIndex}
           onChange={(index) => setFormData({...formData, colorIndex: index})}
         />
       </div>
 
-      <div className="modal-row">
-        <label className="modal-label">Icon</label>
+      <div className="input-row">
+        <label className="modal-label">Icon:</label>
         <IconSelector
           selectedIndex={formData.iconIndex}
           onChange={(index) => setFormData({...formData, iconIndex: index})}
