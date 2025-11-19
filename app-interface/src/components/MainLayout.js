@@ -267,7 +267,15 @@ function MainLayout({ children }) {
 
             <section className="panel-section">
               <div className="panel-subheader">
-                <h3>Widgets</h3>
+                <h3>
+                  Widgets
+                  <span className="tooltip-container" tabIndex="0" aria-label="Widgets tooltip">
+                    <svg className="tooltip-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                    </svg>
+                    <span className="tooltip-text">Shows upcoming deadlines as widgets on the desktop display.</span>
+                  </span>
+                </h3>
               </div>
               <div className="section-body">
                 {widgetsEnabled && (
@@ -307,7 +315,15 @@ function MainLayout({ children }) {
 
             <section className="panel-section">
               <div className="panel-subheader">
-                <h3>Progress Bar</h3>
+                <h3>
+                  Progress Bar
+                  <span className="tooltip-container" tabIndex="0" aria-label="Progress Bar tooltip">
+                    <svg className="tooltip-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                    </svg>
+                    <span className="tooltip-text">Displays today's events along a 24-hour timeline on the desktop.</span>
+                  </span>
+                </h3>
               </div>
               <div className="section-body">
                 {progressBarEnabled && (

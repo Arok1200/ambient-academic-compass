@@ -34,6 +34,7 @@ export default function AddEventModal({ onClose, onSubmit }) {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            placeholder="Enter event title"
             />
         </div>
 
