@@ -1,14 +1,20 @@
 const API_BASE = window.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-const widgetColors = [
-  { bg: '#F3B1D1', border: '#cc5d97' },
-  { bg: '#BDBDBD', border: '#a1a1a1' },
-  { bg: '#6FCF97', border: '#5baa52' },
-  { bg: '#B298F5', border: '#8b6dc9' },
-  { bg: '#9AD1E3', border: '#3aa6b0' }
+// Match the colors from the main interface (WIDGET_COLOR_DETAILS)
+const WIDGET_COLOR_DETAILS = [
+  { bg: '#F3B1D1', border: '#cc5d97' }, // Pink
+  { bg: '#BDBDBD', border: '#a1a1a1' }, // Gray
+  { bg: '#6FCF97', border: '#5baa52' }, // Green
+  { bg: '#B298F5', border: '#8b6dc9' }, // Purple
+  { bg: '#9AD1E3', border: '#3aa6b0' }, // Blue
+  { bg: '#FFD54F', border: '#FFA000' }, // Yellow
+  { bg: '#81C784', border: '#4CAF50' }, // Light Green
+  { bg: '#64B5F6', border: '#2196F3' }, // Light Blue
+  { bg: '#FF8A65', border: '#FF5722' }, // Orange
+  { bg: '#BA68C8', border: '#9C27B0' }  // Light Purple
 ];
 
-const widgetIcons = [
+const WIDGET_ICONS = [
   './icons/assignment.svg',
   './icons/quiz.svg',
   './icons/studying.svg',
@@ -32,7 +38,6 @@ async function fetchData() {
     
     renderWidgets();
     renderTimeline();
-    updateCalendarStats();
     
     document.getElementById('loading').style.display = 'none';
   } catch (error) {
@@ -44,7 +49,7 @@ async function fetchData() {
 function renderWidgets() {
   const dock = document.getElementById('widgetDock');
   
-  const existingWidgets = dock.querySelectorAll('.widget:not(.calendar)');
+  const existingWidgets = dock.querySelectorAll('.widget');
   existingWidgets.forEach(w => w.remove());
   
   const upcomingDeadlines = deadlines
@@ -57,8 +62,11 @@ function renderWidgets() {
     widget.className = 'widget';
     if (index === 0) widget.classList.add('upcoming');
     
-    const color = widgetColors[index % widgetColors.length];
-    const icon = widgetIcons[index % widgetIcons.length];
+    // Use the deadline's actual colorIndex and iconIndex from the database
+    const colorIndex = deadline.colorIndex ?? 0;
+    const iconIndex = deadline.iconIndex ?? 0;
+    const color = WIDGET_COLOR_DETAILS[colorIndex % WIDGET_COLOR_DETAILS.length];
+    const icon = WIDGET_ICONS[iconIndex % WIDGET_ICONS.length];
     
     widget.style.background = color.bg;
     widget.style.border = `4px solid ${color.border}`;
@@ -105,25 +113,57 @@ function renderTimeline() {
     return eventStart >= startOfDay && eventStart <= endOfDay;
   }).sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
   
-  todayEvents.forEach(event => {
-    const eventTime = new Date(event.startTime);
-    const hours = eventTime.getHours();
-    const minutes = eventTime.getMinutes();
-    const totalMinutes = hours * 60 + minutes;
-    const position = (totalMinutes / 1440) * 100;
+  todayEvents.forEach((event, index) => {
+    const eventStart = new Date(event.startTime);
+    const eventEnd = new Date(event.endTime);
+    const isEven = index % 2 === 0;
+    
+    // Calculate start position
+    const startHours = eventStart.getHours();
+    const startMinutes = eventStart.getMinutes();
+    const startTotalMinutes = startHours * 60 + startMinutes;
+    const startPosition = (startTotalMinutes / 1440) * 100;
+    
+    // Calculate end position
+    const endHours = eventEnd.getHours();
+    const endMinutes = eventEnd.getMinutes();
+    const endTotalMinutes = endHours * 60 + endMinutes;
+    const endPosition = (endTotalMinutes / 1440) * 100;
+    
+    // Calculate width (duration)
+    const width = endPosition - startPosition;
     
     const marker = document.createElement('div');
     marker.className = 'event-marker';
-    marker.style.left = `${position}%`;
+    marker.style.left = `${startPosition}%`;
+    marker.style.width = `${width}%`;
     
     const label = document.createElement('div');
-    label.className = 'event-label';
-    label.style.left = `${position}%`;
-    label.textContent = `${eventTime.toLocaleTimeString('en-US', { 
+    label.className = isEven ? 'event-label label-above' : 'event-label label-below';
+    label.style.left = `${startPosition + (width / 2)}%`;
+    
+    const startStr = eventStart.toLocaleTimeString('en-US', { 
       hour: 'numeric', 
       minute: '2-digit',
       hour12: true 
-    })} - ${event.title}`;
+    });
+    const endStr = eventEnd.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+    
+    // Create time and title elements to match main interface
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'event-time';
+    timeDiv.textContent = `${startStr} - ${endStr}`;
+    
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'event-name';
+    nameDiv.textContent = event.title;
+    
+    label.appendChild(timeDiv);
+    label.appendChild(nameDiv);
     
     timeline.appendChild(marker);
     timeline.appendChild(label);
@@ -141,14 +181,6 @@ function updateCurrentTime() {
   const position = (totalSeconds / 86400) * 100;
   
   document.getElementById('currentTime').style.left = `${position}%`;
-}
-
-function updateCalendarStats() {
-  const completedDeadlines = deadlines.filter(d => d.completed).length;
-  const totalDeadlines = deadlines.length;
-  
-  document.getElementById('completedCount').textContent = completedDeadlines;
-  document.getElementById('deadlineCount').textContent = totalDeadlines - completedDeadlines;
 }
 
 function handleWidgetClick(e, widget) {
@@ -210,19 +242,6 @@ async function markAsComplete(deadlineId) {
   }
 }
 
-document.getElementById('calendarWidget').addEventListener('click', (e) => {
-  e.stopPropagation();
-  const calendarPopup = document.getElementById('calendarPopup');
-  const rect = e.target.getBoundingClientRect();
-  calendarPopup.style.left = (rect.left + 20) + 'px';
-  calendarPopup.style.bottom = (window.innerHeight - rect.top + 150) + 'px';
-  calendarPopup.classList.toggle('show');
-});
-
-document.getElementById('calendarClose').addEventListener('click', () => {
-  document.getElementById('calendarPopup').classList.remove('show');
-});
-
 document.getElementById('checkBox').addEventListener('click', (e) => {
   e.stopPropagation();
   
@@ -263,17 +282,12 @@ document.getElementById('noBtn').addEventListener('click', () => {
 document.addEventListener('click', (e) => {
   const widgetPopup = document.getElementById('widgetPopup');
   const confirmPopup = document.getElementById('confirmPopup');
-  const calendarPopup = document.getElementById('calendarPopup');
   const donePopup = document.getElementById('donePopup');
   
   if (!widgetPopup.contains(e.target) && !confirmPopup.contains(e.target)) {
     widgetPopup.classList.remove('show');
     confirmPopup.classList.remove('show');
     donePopup.classList.remove('show');
-  }
-  
-  if (!calendarPopup.contains(e.target) && !e.target.closest('.calendar')) {
-    calendarPopup.classList.remove('show');
   }
 });
 
