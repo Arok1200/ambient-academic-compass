@@ -431,63 +431,59 @@ function MainLayout({ children }) {
               <div className="section-body">
                 {progressBarEnabled && (
                   <div className="progress-display">
-                    {todayEvents.length > 0 ? (
-                      <div className="timeline-container">
+                    <div className="timeline-container">
+                      <div 
+                        className="timeline-bar"
+                        style={{
+                          background: getCurrentProgressBarColor().color,
+                          border: getCurrentProgressBarColor().border ? `2px solid ${getCurrentProgressBarColor().border}` : 'none'
+                        }}
+                      >
                         <div 
-                          className="timeline-bar"
-                          style={{
-                            background: getCurrentProgressBarColor().color,
-                            border: getCurrentProgressBarColor().border ? `2px solid ${getCurrentProgressBarColor().border}` : 'none'
-                          }}
-                        >
-                          <div 
-                            className="current-time-bubble"
-                            style={{ left: `${getCurrentTimePosition()}%` }}
-                          />
-                          {todayEvents.map((event, index) => {
-                            const position = calculateEventPosition(event.startTime);
-                            const width = calculateEventWidth(event.startTime, event.endTime);
-                            const eventStart = new Date(event.startTime);
-                            const eventEnd = new Date(event.endTime);
-                            const startStr = eventStart.toLocaleTimeString('en-US', { 
-                              hour: 'numeric', 
-                              minute: '2-digit',
-                              hour12: true 
-                            });
-                            const endStr = eventEnd.toLocaleTimeString('en-US', { 
-                              hour: 'numeric', 
-                              minute: '2-digit',
-                              hour12: true 
-                            });
-                            const isEven = index % 2 === 0;
-                            
-                            return (
-                              <div 
-                                key={event.id || index}
-                                className={`timeline-event ${isEven ? 'label-above' : 'label-below'}`}
-                                style={{ left: `${position}%`, width: `${width}%` }}
-                                title={`${event.title}: ${startStr} - ${endStr}`}
-                              >
-                                <div className="timeline-marker"></div>
-                                <div className="timeline-label">
-                                  <div className="event-name">{event.title}</div>
-                                  <div className="event-time">{startStr} - {endStr}</div>
-                                </div>
+                          className="current-time-bubble"
+                          style={{ left: `${getCurrentTimePosition()}%` }}
+                        />
+                        {todayEvents.map((event, index) => {
+                          const position = calculateEventPosition(event.startTime);
+                          const width = calculateEventWidth(event.startTime, event.endTime);
+                          const eventStart = new Date(event.startTime);
+                          const eventEnd = new Date(event.endTime);
+                          const startStr = eventStart.toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit',
+                            hour12: true 
+                          });
+                          const endStr = eventEnd.toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit',
+                            hour12: true 
+                          });
+                          const isEven = index % 2 === 0;
+                          
+                          return (
+                            <div 
+                              key={event.id || index}
+                              className={`timeline-event ${isEven ? 'label-above' : 'label-below'}`}
+                              style={{ left: `${position}%`, width: `${width}%` }}
+                              title={`${event.title}: ${startStr} - ${endStr}`}
+                            >
+                              <div className="timeline-marker"></div>
+                              <div className="timeline-label">
+                                <div className="event-name">{event.title}</div>
+                                <div className="event-time">{startStr} - {endStr}</div>
                               </div>
-                            );
-                          })}
-                        </div>
-                        <div className="timeline-hours">
-                          <span>12 AM</span>
-                          <span>6 AM</span>
-                          <span>12 PM</span>
-                          <span>6 PM</span>
-                          <span>11 PM</span>
-                        </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    ) : (
-                      <div className="no-data-message">No events today</div>
-                    )}
+                      <div className="timeline-hours">
+                        <span>12 AM</span>
+                        <span>6 AM</span>
+                        <span>12 PM</span>
+                        <span>6 PM</span>
+                        <span>11 PM</span>
+                      </div>
+                    </div>
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
