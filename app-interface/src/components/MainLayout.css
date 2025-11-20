@@ -768,8 +768,8 @@ button.add-event:hover {
   transform: translate(-50%, -50%);
   width: 40px;
   height: 40px;
-  background: #FF4444;
-  border: none;
+  background: #ffffff;
+  border: 2px solid #000000;
   border-radius: 50%;
   z-index: 20;
   pointer-events: none;
