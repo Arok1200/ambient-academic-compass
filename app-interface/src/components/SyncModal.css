@@ -102,6 +102,12 @@
   border-color: #ef4444;
 }
 
+.sync-modal-close {
+  background-color: white;
+  color: black;
+  border-color: black;
+}
+
 .sync-modal-cancel:hover {
   background-color: #ef4444;
   color: white;

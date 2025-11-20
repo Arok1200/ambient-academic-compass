@@ -20,6 +20,8 @@ import quizIcon from '../assets/icons/quiz.svg';
 import studyingIcon from '../assets/icons/studying.svg';
 import cleanIcon from '../assets/icons/clean.svg';
 import groupDiscussionIcon from '../assets/icons/group-discussion.svg';
+import SettingsModal from './SettingsModal';
+import HelpModal from './HelpModal';
 
 function MainLayout({ children }) {
   const [profilePic, setProfilePic] = useState(null);
@@ -30,6 +32,8 @@ function MainLayout({ children }) {
   const [showSyncModal, setShowSyncModal] = useState(false);
   const location = useLocation();
   const { events, deadlines, loadData, visibleWidgets } = useData();
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const progressBarColors = useMemo(() => [
     { name: 'White', color: '#ffffff', border: '#333333' },
@@ -325,14 +329,22 @@ function MainLayout({ children }) {
               <img src={syncFrame} alt="" className="sync-frame" />
               <img src={syncIcon} alt="Sync" className="sync-icon-img" />
             </button>
-
-            <button className="plain-icon-btn" title="Settings">
+            <button 
+              className="plain-icon-btn" 
+              title="Settings"
+              onClick={() => setShowSettingsModal(true)}
+            >
               <img src={settings} alt="Settings" className="header-icon" />
             </button>
 
-            <button className="plain-icon-btn" title="Help">
+            <button 
+              className="plain-icon-btn" 
+              title="Help"
+              onClick={() => setShowHelpModal(true)}
+            >
               <img src={helpIcon} alt="Help" className="header-icon" />
             </button>
+
 
             <label className="profile-upload" title="Upload Profile Picture">
               <input
@@ -517,6 +529,17 @@ function MainLayout({ children }) {
         onClose={() => setShowSyncModal(false)}
         onConfirm={handleSyncConfirm}
       />
+
+      <SettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
+
+      <HelpModal
+        isOpen={showHelpModal}
+        onClose={() => setShowHelpModal(false)}
+      />
+
     </div>
   );
 }
