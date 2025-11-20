@@ -17,7 +17,7 @@ export const DataProvider = ({ children }) => {
   const [deadlines, setDeadlines] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [hiddenWidgets, setHiddenWidgets] = useState(new Set());
+  const [visibleWidgets, setVisibleWidgets] = useState(new Set());
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -44,6 +44,24 @@ export const DataProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [loadData]);
 
+  // Remove widgets for overdue deadlines
+  useEffect(() => {
+    if (deadlines.length > 0) {
+      const now = new Date();
+      const overdueDeadlineIds = deadlines
+        .filter(d => new Date(d.dueAt) <= now)
+        .map(d => d.id);
+      
+      if (overdueDeadlineIds.length > 0) {
+        setVisibleWidgets(prev => {
+          const newSet = new Set(prev);
+          overdueDeadlineIds.forEach(id => newSet.delete(id));
+          return newSet;
+        });
+      }
+    }
+  }, [deadlines]);
+
   const value = {
     events,
     deadlines,
@@ -52,8 +70,8 @@ export const DataProvider = ({ children }) => {
     loadData,
     setEvents,
     setDeadlines,
-    hiddenWidgets,
-    setHiddenWidgets
+    visibleWidgets,
+    setVisibleWidgets
   };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;

@@ -5,7 +5,7 @@ import { API_BASE_URL } from '../services/api';
 import { WIDGET_COLOR_DETAILS } from '../constants/colors';
 import AddButton from '../components/AddButton';
 import DeadlineItem from '../components/DeadlineItem';
-import { DeadlineModal, EditDeadlineModal, DeleteDeadlineModal } from '../components/modals';
+import { DeadlineModal, EditDeadlineModal, DeleteDeadlineModal, MaxWidgetsModal } from '../components/modals';
 import './DeadlinesPage.css';
 
 import assignmentIcon from '../assets/icons/assignment.svg';
@@ -17,12 +17,13 @@ import groupDiscussionIcon from '../assets/icons/group-discussion.svg';
 const ICON_MAP = [assignmentIcon, quizIcon, studyingIcon, cleanIcon, groupDiscussionIcon];
 
 function DeadlinesPage() {
-  const { deadlines, setDeadlines, loadData, loading, hiddenWidgets, setHiddenWidgets } = useData();
+  const { deadlines, setDeadlines, loadData, loading, visibleWidgets, setVisibleWidgets } = useData();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDeadline, setEditingDeadline] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingDeadline, setDeletingDeadline] = useState(null);
+  const [maxWidgetsModalOpen, setMaxWidgetsModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState('active');
 
@@ -108,7 +109,15 @@ function DeadlinesPage() {
   };
 
   const handleToggleWidget = (deadline) => {
-    setHiddenWidgets(prev => {
+    const isCurrentlyVisible = visibleWidgets.has(deadline.id);
+    
+    // If trying to show a widget but already have 5 active widgets
+    if (!isCurrentlyVisible && visibleWidgets.size >= 5) {
+      setMaxWidgetsModalOpen(true);
+      return;
+    }
+    
+    setVisibleWidgets(prev => {
       const newSet = new Set(prev);
       if (newSet.has(deadline.id)) newSet.delete(deadline.id);
       else newSet.add(deadline.id);
@@ -158,7 +167,9 @@ function DeadlinesPage() {
               {filteredDeadlines.map(deadline => {
                 const colorDetail = WIDGET_COLOR_DETAILS[deadline.colorIndex || 0];
                 const icon = ICON_MAP[deadline.iconIndex || 0];
-                const isWidgetShown = !hiddenWidgets.has(deadline.id);
+                const isOverdue = new Date(deadline.dueAt) <= new Date();
+                const isWidgetShown = visibleWidgets.has(deadline.id);
+                
                 return (
                   <DeadlineItem
                     key={deadline.id}
@@ -173,6 +184,7 @@ function DeadlinesPage() {
                     showWidget={isWidgetShown}
                     onWidgetToggle={() => handleToggleWidget(deadline)}
                     isReminderOn={deadline.pinned}
+                    isOverdue={isOverdue}
                   />
                 );
               })}
@@ -202,6 +214,11 @@ function DeadlinesPage() {
         onClose={() => { setDeleteModalOpen(false); setDeletingDeadline(null); }}
         onConfirm={handleDeleteDeadline}
         deadline={deletingDeadline}
+      />
+
+      <MaxWidgetsModal
+        isOpen={maxWidgetsModalOpen}
+        onClose={() => setMaxWidgetsModalOpen(false)}
       />
     </div>
   );

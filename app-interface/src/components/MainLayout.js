@@ -29,7 +29,7 @@ function MainLayout({ children }) {
   const [syncing, setSyncing] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const location = useLocation();
-  const { events, deadlines, loadData, hiddenWidgets } = useData();
+  const { events, deadlines, loadData, visibleWidgets } = useData();
 
   const progressBarColors = useMemo(() => [
     { name: 'White', color: '#ffffff', border: '#333333' },
@@ -261,7 +261,7 @@ function MainLayout({ children }) {
     
     const now = new Date();
     return deadlines
-      .filter(d => !hiddenWidgets.has(d.id) && new Date(d.dueAt) > now && !d.completed)
+      .filter(d => visibleWidgets.has(d.id) && new Date(d.dueAt) > now && !d.completed)
       .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
       .slice(0, 5);
   };

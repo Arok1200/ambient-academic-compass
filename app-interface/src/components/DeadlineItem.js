@@ -41,7 +41,8 @@ function DeadlineItem({
   showWidget,
   onWidgetToggle,
   selected = false,
-  isReminderOn
+  isReminderOn,
+  isOverdue = false
 }) {
   return (
     <div className={`deadline-item-row ${selected ? 'selected' : ''}`}>
@@ -108,10 +109,12 @@ function DeadlineItem({
 
           {}
           <button 
-            className={`deadline-widget-btn ${!showWidget ? 'show-widget' : ''}`}
+            className={`deadline-widget-btn ${!showWidget ? 'show-widget' : ''} ${isOverdue ? 'disabled' : ''}`}
             onClick={onWidgetToggle}
+            disabled={isOverdue}
+            title={isOverdue ? "Cannot show widget for overdue deadline" : ""}
           >
-            {showWidget ? 'Hide Widget' : 'Show Widget'}
+            {isOverdue ? 'Overdue' : (showWidget ? 'Hide Widget' : 'Show Widget')}
           </button>
 
         </div>

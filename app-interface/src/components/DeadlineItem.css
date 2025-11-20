@@ -157,6 +157,19 @@
   background-color: #F0F0F0;
 }
 
+.deadline-widget-btn.disabled {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+  color: #999;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.deadline-widget-btn.disabled:hover {
+  background-color: #f5f5f5;
+  border-color: #d0d0d0;
+}
+
 .deadline-icon-btn {
   background: none;      
   border: none;          
