@@ -14,17 +14,14 @@ function EditDeadlineModal({ isOpen, onClose, onSubmit, initialData = null }) {
     iconIndex: 0
   });
 
-  // Update form data whenever initialData changes
   useEffect(() => {
     if (initialData) {
       const due = new Date(initialData.dueAt);
-      // Get local date in YYYY-MM-DD
     const year = due.getFullYear();
     const month = String(due.getMonth() + 1).padStart(2, '0');
     const day = String(due.getDate()).padStart(2, '0');
     const dueDate = `${year}-${month}-${day}`;
 
-    // Get local time in HH:MM
     const hours = String(due.getHours()).padStart(2, '0');
     const minutes = String(due.getMinutes()).padStart(2, '0');
     const dueTime = `${hours}:${minutes}`;

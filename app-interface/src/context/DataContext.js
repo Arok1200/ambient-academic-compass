@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import { API_BASE_URL } from '../services/api';
 
@@ -33,11 +33,16 @@ export const DataProvider = ({ children }) => {
       console.warn('Backend not available, using empty data:', err.message);
       setEvents([]);
       setDeadlines([]);
-      setError(null); // Don't show error to user
+      setError(null);
     } finally {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(loadData, 10000);
+    return () => clearInterval(interval);
+  }, [loadData]);
 
   const value = {
     events,

@@ -28,7 +28,7 @@
     width: 40%;
     max-width: 500px;
     height: 28px;
-    background: white;
+    background: #9892ff; 
     border: 1px solid rgba(0, 0, 0, 0.6);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     border-radius: 0;
@@ -40,24 +40,26 @@
     position: absolute;
     top: 0;
     height: 100%;
-    background: #1e1e1e;
+    background: #000000; 
     border-radius: 0;
     cursor: pointer;
+    
+    box-sizing: border-box;
+    border: none;
   }
 
   
   .current-time {
     position: absolute;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    top: 0;
+    transform: translateX(-50%);
     width: 40px;
     height: 40px;
-    background: white;
-    border: 1.5px solid black;
+    background: #FF4444;
+    border: none;
     border-radius: 50%;
-    z-index: 5;
-    transition: left 1s linear;
-    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    z-index: 15;
+    pointer-events: none; 
   }
 
   
@@ -68,13 +70,15 @@
     padding: 10px 15px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    border: 1px solid #ddd;
     text-align: center;
     transform: translate(-50%, -140%);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.25s ease-in-out;
-    z-index: 10;
+    z-index: 20;
     min-width: 160px;
+    max-width: 200px;
   }
 
   .popup.show {
@@ -83,14 +87,19 @@
   }
 
   .popup h3 {
-    margin: 0;
+    margin: 0 0 4px 0;
+    font-family: Arial, sans-serif;
     font-size: 15px;
-    font-weight: bold;
+    font-weight: 700;
+    color: #000;
   }
 
   .popup p {
-    margin: 4px 0 0 0;
+    margin: 0;
+    font-family: Arial, sans-serif;
     font-size: 13px;
+    font-weight: 500;
+    color: #555;
   }
 
   
@@ -150,8 +159,7 @@
   const timeline = document.getElementById("timeline");
 
   events.forEach(e => {
-    e.addEventListener("click", (event) => {
-      event.stopPropagation();
+    e.addEventListener("mouseenter", (event) => {
       title.textContent = e.dataset.title;
       time.textContent = e.dataset.time;
 
@@ -164,13 +172,58 @@
 
       popup.classList.add("show");
     });
+
+    e.addEventListener("mouseleave", () => {
+      popup.classList.remove("show");
+    });
   });
 
-  document.addEventListener("click", (e) => {
-    if (!popup.contains(e.target) && !e.target.classList.contains("event")) {
-      popup.classList.remove("show");
+  window.addEventListener('message', (event) => {
+    if (event.data.type === 'PROGRESS_BAR_COLOR_CHANGE') {
+      const timelineContainer = document.querySelector('.timeline-container');
+      if (timelineContainer) {
+        timelineContainer.style.background = event.data.backgroundColor;
+        if (event.data.borderColor) {
+          timelineContainer.style.border = `2px solid ${event.data.borderColor}`;
+        }
+      }
     }
   });
+
+  const savedColorIndex = localStorage.getItem('progressBarColorIndex');
+  if (savedColorIndex) {
+    const colors = [
+      { color: '#ffffff', border: '#333333' }, { color: '#e5e5e5', border: '#999999' },
+      { color: '#FFF9C4', border: '#ccca9d' }, { color: '#FFCCBC', border: '#cca295' },
+      { color: '#C8E6C9', border: '#a1b8a2' }, { color: '#BBDEFB', border: '#95b1cb' },
+      { color: '#F8BBD0', border: '#c995a6' }, { color: '#E1BEE7', border: '#b598ba' },
+      { color: '#0066ff', border: '#004499' }, { color: '#00ff66', border: '#00cc52' },
+      { color: '#ffb6c1', border: '#cc9199' }, { color: '#9892ff', border: '#7b75cc' },
+      { color: '#00ffff', border: '#00cccc' }, { color: '#ccff00', border: '#a6cc00' },
+      { color: '#ff00ff', border: '#cc00cc' }, { color: '#ffff00', border: '#cccc00' },
+      { color: '#4169e1', border: '#2854b4' }, { color: '#228b22', border: '#1b6b1b' },
+      { color: '#87ceeb', border: '#6ba6cd' }, { color: '#98fb98', border: '#7bc97b' },
+      { color: '#dda0dd', border: '#b87db8' }, { color: '#F3B1D1', border: '#cc5d97' },
+      { color: '#BDBDBD', border: '#a1a1a1' }, { color: '#6FCF97', border: '#5baa52' },
+      { color: '#B298F5', border: '#8b6dc9' }, { color: '#9AD1E3', border: '#3aa6b0' },
+      { color: '#c0c0c0', border: '#999999' }, { color: '#ffd700', border: '#ccac00' },
+      { color: '#ffa500', border: '#cc8400' }, { color: '#40e0d0', border: '#33b3a6' },
+      { color: '#8a2be2', border: '#6b22b5' }, { color: '#00ff7f', border: '#00cc66' },
+      { color: '#00bfff', border: '#0099cc' }, { color: '#ba55d3', border: '#9444a6' },
+      { color: '#7fffd4', border: '#66cca7' }, { color: '#8a2be2', border: '#6b22b5' },
+      { color: '#7fff00', border: '#66cc00' }
+    ];
+    
+    const index = parseInt(savedColorIndex, 10);
+    const selectedColor = colors[index];
+    if (selectedColor) {
+      const timelineContainer = document.querySelector('.timeline-container');
+      if (timelineContainer) {
+        timelineContainer.style.background = selectedColor.color;
+        timelineContainer.style.border = `2px solid ${selectedColor.border}`;
+      }
+    }
+  }
 </script>
 </body>
 </html>

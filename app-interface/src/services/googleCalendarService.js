@@ -1,5 +1,5 @@
 
-const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/calendar';
 
 class GoogleCalendarService {
   constructor() {
@@ -16,7 +16,7 @@ class GoogleCalendarService {
             clientId: clientId,
             discoveryDocs: [
               'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
-              'https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest'
+              'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
             ],
             scope: SCOPES,
           });
@@ -66,7 +66,7 @@ class GoogleCalendarService {
       const response = await this.gapi.client.calendar.events.list({
         calendarId: 'primary',
         timeMin: timeMin || new Date().toISOString(),
-        timeMax: timeMax || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days ahead
+        timeMax: timeMax || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), 
         showDeleted: false,
         singleEvents: true,
         orderBy: 'startTime',
@@ -142,7 +142,7 @@ class GoogleCalendarService {
     return googleTasks.map(task => ({
       title: task.title || 'Untitled Task',
       description: task.notes || '',
-      dueAt: task.due || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // Default to 7 days from now
+      dueAt: task.due || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), 
       completed: task.status === 'completed',
       pinned: true,
       source: 'google_tasks'

@@ -1,8 +1,6 @@
-import React, { useState, useRef } from 'react';
-import OverflowMenu from './OverflowMenu';
+import React from 'react';
 import './DeadlineItem.css';
 
-// Bell outline
 const OutlineBellIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -10,7 +8,6 @@ const OutlineBellIcon = () => (
   </svg>
 );
 
-// Bell filled
 const FilledBellIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -18,7 +15,6 @@ const FilledBellIcon = () => (
   </svg>
 );
 
-// Edit pencil
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -26,7 +22,6 @@ const EditIcon = () => (
   </svg>
 );
 
-// Trash can
 const DeleteIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <polyline points="3 6 5 6 21 6" />
@@ -48,9 +43,6 @@ function DeadlineItem({
   selected = false,
   isReminderOn
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const menuButtonRef = useRef(null);
-
   return (
     <div className={`deadline-item-row ${selected ? 'selected' : ''}`}>
       <div className="deadline-checkbox-container">
@@ -82,7 +74,7 @@ function DeadlineItem({
       <div className="deadline-actions-section">
         <div className="deadline-actions-section">
 
-          {/* Reminder toggle */}
+          {}
           <button 
             type="button"
             className={`icon-btn deadline-icon-btn ${isReminderOn ? 'active' : ''}`}
@@ -96,7 +88,7 @@ function DeadlineItem({
             )}
           </button>
 
-          {/* Edit */}
+          {}
           <button 
             className="icon-btn deadline-icon-btn"
             onClick={() => onMenuClick?.('edit')}
@@ -105,7 +97,7 @@ function DeadlineItem({
             <EditIcon />
           </button>
 
-          {/* Delete */}
+          {}
           <button 
             className="icon-btn deadline-icon-btn"
             onClick={() => onMenuClick?.('delete')}
@@ -114,7 +106,7 @@ function DeadlineItem({
             <DeleteIcon />
           </button>
 
-          {/* Widget toggle */}
+          {}
           <button 
             className={`deadline-widget-btn ${!showWidget ? 'show-widget' : ''}`}
             onClick={onWidgetToggle}

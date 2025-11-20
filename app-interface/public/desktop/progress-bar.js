@@ -3,7 +3,11 @@ function updateCurrentTime() {
   const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
   const total = h * 3600 + m * 60 + s;
   const percent = (total / 86400) * 100;
-  document.getElementById("currentTime").style.left = percent + "%";
+  
+  const currentTimeElement = document.getElementById("currentTime");
+  if (currentTimeElement) {
+    currentTimeElement.style.left = percent + "%";
+  }
 }
 
 updateCurrentTime();
@@ -26,7 +30,7 @@ events.forEach(e => {
     const offsetX = rect.left - containerRect.left + rect.width / 2;
 
     popup.style.left = offsetX + containerRect.left + "px";
-    popup.style.top = containerRect.top - 10 + "px";
+    popup.style.top = containerRect.top - 15 + "px";
     popup.classList.add("show");
 
     setTimeout(() => popup.classList.remove("show"), 3000);

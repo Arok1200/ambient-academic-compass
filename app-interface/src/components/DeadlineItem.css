@@ -158,16 +158,16 @@
 }
 
 .deadline-icon-btn {
-  background: none;      /* remove default background */
-  border: none;          /* remove default border */
+  background: none;      
+  border: none;          
   padding: 4px 4px;
-  margin: 0;             /* optional, remove margin */
-  cursor: pointer;       /* pointer cursor on hover */
-  display: inline-flex;  /* ensures proper icon alignment */
-  align-items: center;   /* vertical align */
-  justify-content: center; /* horizontal align */
+  margin: 0;             
+  cursor: pointer;       
+  display: inline-flex;  
+  align-items: center;   
+  justify-content: center; 
 }
 
 .deadline-icon-btn:focus {
-  outline: none;         /* remove the focus outline */
+  outline: none;         
 }

@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { NOTE_COLORS } from '../constants/colors';
 import AddButton from '../components/AddButton';
-import { NoteModal } from '../components/modals';
+import { NoteModal, DeleteNoteModal } from '../components/modals';
 
 const API_URL = 'http://localhost:8080/api/notes';
+
+
+const DeleteIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="3 6 5 6 21 6" />
+    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+  </svg>
+);
 
 function NotesPage() {
   const [notes, setNotes] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deletingNote, setDeletingNote] = useState(null);
 
   useEffect(() => {
     fetchNotes();
@@ -66,15 +76,21 @@ function NotesPage() {
     }
   };
 
-  const handleDeleteNote = async (id) => {
-    if (window.confirm('Are you sure you want to delete this note?')) {
-      try {
-        await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-        setNotes(notes.filter(n => n.id !== id));
-      } catch (error) {
-        console.error('Failed to delete note:', error);
-        alert('Failed to delete note. Please try again.');
-      }
+  const handleDeleteNote = (note) => {
+    setDeletingNote(note);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingNote) return;
+    try {
+      await fetch(`${API_URL}/${deletingNote.id}`, { method: 'DELETE' });
+      setNotes(notes.filter(n => n.id !== deletingNote.id));
+      setDeleteModalOpen(false);
+      setDeletingNote(null);
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+      alert('Failed to delete note. Please try again.');
     }
   };
 
@@ -118,11 +134,11 @@ function NotesPage() {
                       className="note-action-btn"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteNote(note.id);
+                        handleDeleteNote(note);
                       }}
                       title="Delete note"
                     >
-                      🗑️
+                      <DeleteIcon />
                     </button>
                   </div>
                 </div>
@@ -139,6 +155,12 @@ function NotesPage() {
         onClose={() => setShowModal(false)}
         onSubmit={handleAddNote}
         initialData={null}
+      />
+
+      <DeleteNoteModal
+        note={deletingNote}
+        onClose={() => { setDeleteModalOpen(false); setDeletingNote(null); }}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

@@ -9,13 +9,11 @@ export const DataProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [hiddenWidgets, setHiddenWidgets] = useState(new Set());
 
-  // Load hiddenWidgets from localStorage
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('hiddenWidgets')) || [];
     setHiddenWidgets(new Set(saved));
   }, []);
 
-  // Persist hiddenWidgets to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('hiddenWidgets', JSON.stringify([...hiddenWidgets]));
   }, [hiddenWidgets]);
@@ -26,11 +24,10 @@ export const DataProvider = ({ children }) => {
       const response = await axios.get(`${API_BASE_URL}/deadlines`);
       setDeadlines(response.data);
 
-      // Optional: initialize hiddenWidgets for new deadlines
       setHiddenWidgets(prev => {
         const updatedSet = new Set(prev);
         response.data.forEach(d => {
-          if (!updatedSet.has(d.id)) updatedSet.add(d.id); // hidden by default
+          if (!updatedSet.has(d.id)) updatedSet.add(d.id); 
         });
         return updatedSet;
       });

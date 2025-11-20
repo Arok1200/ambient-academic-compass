@@ -9,7 +9,6 @@ import EditEventModal from "../components/EditEventModal";
 import DeleteEventModal from "../components/DeleteEventModal";
 import "./EventsPage.css";
 
-// Edit pencil
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -17,7 +16,6 @@ const EditIcon = () => (
   </svg>
 );
 
-// Trash can
 const DeleteIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <polyline points="3 6 5 6 21 6" />
@@ -28,15 +26,12 @@ const DeleteIcon = () => (
 function EventsPage() {
   const { events, loading, loadData } = useData();
 
-  // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [deleteEvent, setDeleteEvent] = useState(null);
 
-  // Selected date
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Add event
   const handleSubmitEvent = async (newEvent) => {
     try {
       await axios.post(`${API_BASE_URL}/events`, newEvent);
@@ -48,7 +43,6 @@ function EventsPage() {
     }
   };
 
-  // Edit event
   const handleUpdateEvent = async (updatedEvent) => {
     try {
       await axios.put(`${API_BASE_URL}/events/${updatedEvent.id}`, updatedEvent);
@@ -60,7 +54,6 @@ function EventsPage() {
     }
   };
 
-  // Delete event
   const handleConfirmDelete = async (eventToDelete) => {
     try {
       await axios.delete(`${API_BASE_URL}/events/${eventToDelete.id}`);
@@ -72,7 +65,6 @@ function EventsPage() {
     }
   };
 
-  // Filter events for the selected day (local time)
   const eventsForSelectedDay = events.filter((event) => {
     const eventDate = new Date(event.startTime);
     return (
@@ -126,10 +118,10 @@ function EventsPage() {
       </div>
 
 
-      {/* Add Event Button */}
+      {}
       <AddButton label="Add Event +" onClick={() => setShowAddModal(true)} />
 
-      {/* Modals */}
+      {}
       {showAddModal && (
         <AddEventModal
           onClose={() => setShowAddModal(false)}

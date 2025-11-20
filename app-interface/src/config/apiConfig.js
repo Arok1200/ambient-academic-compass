@@ -4,9 +4,9 @@ export const GOOGLE_CONFIG = {
   apiKey: process.env.REACT_APP_GOOGLE_API_KEY || 'your-google-api-key',
   discoveryDocs: [
     'https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest',
-    'https://www.googleapis.com/discovery/v1/apis/tasks/v1/rest'
+    'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
   ],
-  scopes: 'https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/tasks.readonly',
+  scopes: 'https://www.googleapis.com/auth/calendar'
 };
 
 export const NOTION_CONFIG = {

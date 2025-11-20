@@ -1,17 +1,16 @@
 const API_BASE = window.REACT_APP_API_BASE_URL || 'http://localhost:8080';
 
-// Match the colors from the main interface (WIDGET_COLOR_DETAILS)
 const WIDGET_COLOR_DETAILS = [
-  { bg: '#F3B1D1', border: '#cc5d97' }, // Pink
-  { bg: '#BDBDBD', border: '#a1a1a1' }, // Gray
-  { bg: '#6FCF97', border: '#5baa52' }, // Green
-  { bg: '#B298F5', border: '#8b6dc9' }, // Purple
-  { bg: '#9AD1E3', border: '#3aa6b0' }, // Blue
-  { bg: '#FFD54F', border: '#FFA000' }, // Yellow
-  { bg: '#81C784', border: '#4CAF50' }, // Light Green
-  { bg: '#64B5F6', border: '#2196F3' }, // Light Blue
-  { bg: '#FF8A65', border: '#FF5722' }, // Orange
-  { bg: '#BA68C8', border: '#9C27B0' }  // Light Purple
+  { bg: '#F3B1D1', border: '#cc5d97' },
+  { bg: '#BDBDBD', border: '#a1a1a1' },
+  { bg: '#6FCF97', border: '#5baa52' },
+  { bg: '#B298F5', border: '#8b6dc9' },
+  { bg: '#9AD1E3', border: '#3aa6b0' },
+  { bg: '#FFD54F', border: '#FFA000' },
+  { bg: '#81C784', border: '#4CAF50' },
+  { bg: '#64B5F6', border: '#2196F3' },
+  { bg: '#FF8A65', border: '#FF5722' },
+  { bg: '#BA68C8', border: '#9C27B0' }
 ];
 
 const WIDGET_ICONS = [
@@ -62,7 +61,6 @@ function renderWidgets() {
     widget.className = 'widget';
     if (index === 0) widget.classList.add('upcoming');
     
-    // Use the deadline's actual colorIndex and iconIndex from the database
     const colorIndex = deadline.colorIndex ?? 0;
     const iconIndex = deadline.iconIndex ?? 0;
     const color = WIDGET_COLOR_DETAILS[colorIndex % WIDGET_COLOR_DETAILS.length];
@@ -118,19 +116,16 @@ function renderTimeline() {
     const eventEnd = new Date(event.endTime);
     const isEven = index % 2 === 0;
     
-    // Calculate start position
     const startHours = eventStart.getHours();
     const startMinutes = eventStart.getMinutes();
     const startTotalMinutes = startHours * 60 + startMinutes;
     const startPosition = (startTotalMinutes / 1440) * 100;
     
-    // Calculate end position
     const endHours = eventEnd.getHours();
     const endMinutes = eventEnd.getMinutes();
     const endTotalMinutes = endHours * 60 + endMinutes;
     const endPosition = (endTotalMinutes / 1440) * 100;
     
-    // Calculate width (duration)
     const width = endPosition - startPosition;
     
     const marker = document.createElement('div');
@@ -153,17 +148,16 @@ function renderTimeline() {
       hour12: true 
     });
     
-    // Create time and title elements to match main interface
-    const timeDiv = document.createElement('div');
-    timeDiv.className = 'event-time';
-    timeDiv.textContent = `${startStr} - ${endStr}`;
-    
     const nameDiv = document.createElement('div');
     nameDiv.className = 'event-name';
     nameDiv.textContent = event.title;
     
-    label.appendChild(timeDiv);
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'event-time';
+    timeDiv.textContent = `${startStr} - ${endStr}`;
+    
     label.appendChild(nameDiv);
+    label.appendChild(timeDiv);
     
     timeline.appendChild(marker);
     timeline.appendChild(label);
@@ -202,26 +196,50 @@ function handleWidgetClick(e, widget) {
 }
 
 async function markAsComplete(deadlineId) {
+  console.log('markAsComplete called with deadlineId:', deadlineId);
+  
+  const donePopup = document.getElementById('donePopup');
+  const doneText = document.getElementById('doneText');
+  
+  if (!donePopup || !doneText) {
+    console.error('Required popup elements not found:', { donePopup: !!donePopup, doneText: !!doneText });
+    return;
+  }
+  
+  if (!activeWidget) {
+    console.error('No active widget set');
+    return;
+  }
+  
   try {
     const deadline = deadlines.find(d => d.id === deadlineId);
-    if (!deadline) return;
+    console.log('Found deadline:', deadline);
+    if (!deadline) {
+      console.error('Deadline not found for id:', deadlineId);
+      console.log('Available deadlines:', deadlines.map(d => ({ id: d.id, title: d.title })));
+      return;
+    }
+    
+    const requestBody = {
+      ...deadline,
+      completed: true
+    };
+    console.log('Sending request to:', `${API_BASE}/deadlines/${deadlineId}`);
+    console.log('Request body:', requestBody);
     
     const response = await fetch(`${API_BASE}/deadlines/${deadlineId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        ...deadline,
-        completed: true
-      })
+      body: JSON.stringify(requestBody)
     });
     
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    
     if (response.ok) {
-      await fetchData();
-      
-      const donePopup = document.getElementById('donePopup');
-      const doneText = document.getElementById('doneText');
+      console.log('Successfully marked as complete');
       
       doneText.textContent = 'Marked as done';
       
@@ -232,10 +250,16 @@ async function markAsComplete(deadlineId) {
       
       activeWidget.classList.add('fade-out');
       
-      setTimeout(() => {
-        activeWidget.classList.add('hidden');
+      setTimeout(async () => {
+        console.log('Refreshing data and re-rendering widgets');
+        await fetchData();
+        renderWidgets();
+        
         donePopup.classList.remove('show');
       }, 500);
+    } else {
+      const errorText = await response.text();
+      console.error('Failed to mark deadline as complete. Status:', response.status, 'Error:', errorText);
     }
   } catch (error) {
     console.error('Failed to mark deadline as complete:', error);
@@ -243,6 +267,7 @@ async function markAsComplete(deadlineId) {
 }
 
 document.getElementById('checkBox').addEventListener('click', (e) => {
+  console.log('Checkbox clicked');
   e.stopPropagation();
   
   const widgetPopup = document.getElementById('widgetPopup');
@@ -258,6 +283,7 @@ document.getElementById('checkBox').addEventListener('click', (e) => {
 });
 
 document.getElementById('yesBtn').addEventListener('click', () => {
+  console.log('Yes button clicked');
   const confirmPopup = document.getElementById('confirmPopup');
   const widgetPopup = document.getElementById('widgetPopup');
   
@@ -266,8 +292,11 @@ document.getElementById('yesBtn').addEventListener('click', () => {
   widgetPopup.classList.remove('show');
   
   if (activeWidget) {
-    const deadlineId = activeWidget.dataset.deadlineId;
+    const deadlineId = parseInt(activeWidget.dataset.deadlineId, 10);
+    console.log('Calling markAsComplete with deadlineId:', deadlineId, 'type:', typeof deadlineId);
     markAsComplete(deadlineId);
+  } else {
+    console.error('No active widget found');
   }
 });
 
@@ -293,4 +322,4 @@ document.addEventListener('click', (e) => {
 
 fetchData();
 setInterval(updateCurrentTime, 60000);
-setInterval(fetchData, 30000);
+setInterval(fetchData, 10000);

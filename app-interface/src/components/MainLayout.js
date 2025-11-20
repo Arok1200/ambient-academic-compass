@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import './MainLayout.css';
 import { useData } from '../context/DataContext';
@@ -25,10 +25,51 @@ function MainLayout({ children }) {
   const [profilePic, setProfilePic] = useState(null);
   const [widgetsEnabled, setWidgetsEnabled] = useState(true);
   const [progressBarEnabled, setProgressBarEnabled] = useState(true);
+  const [progressBarColorIndex, setProgressBarColorIndex] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const location = useLocation();
   const { events, deadlines, loadData, hiddenWidgets } = useData();
+
+  const progressBarColors = useMemo(() => [
+    { name: 'White', color: '#ffffff', border: '#333333' },
+    { name: 'Light Gray', color: '#e5e5e5', border: '#999999' },
+    { name: 'Pastel Yellow', color: '#FFF9C4', border: '#ccca9d' },
+    { name: 'Coral', color: '#FFCCBC', border: '#cca295' },
+    { name: 'Pastel Green', color: '#C8E6C9', border: '#a1b8a2' },
+    { name: 'Pastel Blue', color: '#BBDEFB', border: '#95b1cb' },
+    { name: 'Rose', color: '#F8BBD0', border: '#c995a6' },
+    { name: 'Light Purple', color: '#E1BEE7', border: '#b598ba' },
+    { name: 'Electric Blue', color: '#0066ff', border: '#004499' },
+    { name: 'Neon Green', color: '#00ff66', border: '#00cc52' },
+    { name: 'Light Pink', color: '#ffb6c1', border: '#cc9199' },
+    { name: 'Purple', color: '#9892ff', border: '#7b75cc' },
+    { name: 'Neon Cyan', color: '#00ffff', border: '#00cccc' },
+    { name: 'Lime', color: '#ccff00', border: '#a6cc00' },
+    { name: 'Magenta', color: '#ff00ff', border: '#cc00cc' },
+    { name: 'Electric Yellow', color: '#ffff00', border: '#cccc00' },
+    { name: 'Royal Blue', color: '#4169e1', border: '#2854b4' },
+    { name: 'Forest Green', color: '#228b22', border: '#1b6b1b' },
+    { name: 'Sky Blue', color: '#87ceeb', border: '#6ba6cd' },
+    { name: 'Mint', color: '#98fb98', border: '#7bc97b' },
+    { name: 'Lavender', color: '#dda0dd', border: '#b87db8' },
+    { name: 'Widget Pink', color: '#F3B1D1', border: '#cc5d97' },
+    { name: 'Widget Gray', color: '#BDBDBD', border: '#a1a1a1' },
+    { name: 'Widget Green', color: '#6FCF97', border: '#5baa52' },
+    { name: 'Widget Purple', color: '#B298F5', border: '#8b6dc9' },
+    { name: 'Widget Blue', color: '#9AD1E3', border: '#3aa6b0' },
+    { name: 'Silver', color: '#c0c0c0', border: '#999999' },
+    { name: 'Gold', color: '#ffd700', border: '#ccac00' },
+    { name: 'Warning Yellow', color: '#ffa500', border: '#cc8400' },
+    { name: 'Turquoise', color: '#40e0d0', border: '#33b3a6' },
+    { name: 'Violet', color: '#8a2be2', border: '#6b22b5' },
+    { name: 'Spring Green', color: '#00ff7f', border: '#00cc66' },
+    { name: 'Deep Sky Blue', color: '#00bfff', border: '#0099cc' },
+    { name: 'Medium Orchid', color: '#ba55d3', border: '#9444a6' },
+    { name: 'Aqua Marine', color: '#7fffd4', border: '#66cca7' },
+    { name: 'Blue Violet', color: '#8a2be2', border: '#6b22b5' },
+    { name: 'Chartreuse', color: '#7fff00', border: '#66cc00' }
+  ], []);
 
   useEffect(() => {
     loadData();
@@ -165,6 +206,54 @@ function MainLayout({ children }) {
     setProgressBarEnabled(!progressBarEnabled);
   };
 
+  const handleChangeProgressBarColor = () => {
+    const nextIndex = (progressBarColorIndex + 1) % progressBarColors.length;
+    setProgressBarColorIndex(nextIndex);
+    
+    localStorage.setItem('progressBarColorIndex', nextIndex.toString());
+    
+    const currentColor = progressBarColors[nextIndex];
+    updateProgressBarColor(currentColor.color, currentColor.border);
+  };
+
+  const updateProgressBarColor = (backgroundColor, borderColor) => {
+    const timelineBars = document.querySelectorAll('.timeline-bar');
+    timelineBars.forEach(bar => {
+      bar.style.background = backgroundColor;
+      if (borderColor) {
+        bar.style.border = `2px solid ${borderColor}`;
+      }
+    });
+
+    window.postMessage({ 
+      type: 'PROGRESS_BAR_COLOR_CHANGE', 
+      backgroundColor, 
+      borderColor 
+    }, '*');
+  };
+
+  useEffect(() => {
+    const savedColorIndex = localStorage.getItem('progressBarColorIndex');
+    if (savedColorIndex) {
+      const index = parseInt(savedColorIndex, 10);
+      if (index >= 0 && index < progressBarColors.length) {
+        setProgressBarColorIndex(index);
+        const savedColor = progressBarColors[index];
+        updateProgressBarColor(savedColor.color, savedColor.border);
+      } else {
+        setProgressBarColorIndex(0);
+        localStorage.removeItem('progressBarColorIndex');
+      }
+    }
+  }, [progressBarColors]);
+
+  const getCurrentProgressBarColor = () => {
+    const safeIndex = progressBarColorIndex >= 0 && progressBarColorIndex < progressBarColors.length 
+      ? progressBarColorIndex 
+      : 0; 
+    return progressBarColors[safeIndex];
+  };
+
   const isActive = (path) => location.pathname === path;
 
   const getUpcomingDeadlines = () => {
@@ -204,6 +293,14 @@ function MainLayout({ children }) {
     const startPos = calculateEventPosition(startTime);
     const endPos = calculateEventPosition(endTime);
     return endPos - startPos;
+  };
+
+  const getCurrentTimePosition = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const totalMinutes = hours * 60 + minutes;
+    return (totalMinutes / 1440) * 100;
   };
 
   const upcomingDeadlines = getUpcomingDeadlines();
@@ -336,7 +433,17 @@ function MainLayout({ children }) {
                   <div className="progress-display">
                     {todayEvents.length > 0 ? (
                       <div className="timeline-container">
-                        <div className="timeline-bar">
+                        <div 
+                          className="timeline-bar"
+                          style={{
+                            background: getCurrentProgressBarColor().color,
+                            border: getCurrentProgressBarColor().border ? `2px solid ${getCurrentProgressBarColor().border}` : 'none'
+                          }}
+                        >
+                          <div 
+                            className="current-time-bubble"
+                            style={{ left: `${getCurrentTimePosition()}%` }}
+                          />
                           {todayEvents.map((event, index) => {
                             const position = calculateEventPosition(event.startTime);
                             const width = calculateEventWidth(event.startTime, event.endTime);
@@ -363,8 +470,8 @@ function MainLayout({ children }) {
                               >
                                 <div className="timeline-marker"></div>
                                 <div className="timeline-label">
-                                  <div className="event-time">{startStr} - {endStr}</div>
                                   <div className="event-name">{event.title}</div>
+                                  <div className="event-time">{startStr} - {endStr}</div>
                                 </div>
                               </div>
                             );
@@ -383,9 +490,21 @@ function MainLayout({ children }) {
                     )}
                   </div>
                 )}
-                <button className="sidebar-btn" onClick={handleToggleProgressBar}>
-                  {progressBarEnabled ? 'Disable' : 'Enable'}
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                  <button className="sidebar-btn" onClick={handleToggleProgressBar}>
+                    {progressBarEnabled ? 'Disable' : 'Enable'}
+                  </button>
+                  {progressBarEnabled && (
+                    <button 
+                      className="sidebar-btn" 
+                      onClick={handleChangeProgressBarColor}
+                      title={`Current: ${getCurrentProgressBarColor().name}`}
+                      style={{ position: 'absolute', right: '0' }}
+                    >
+                      Change Color
+                    </button>
+                  )}
+                </div>
               </div>
             </section>
 

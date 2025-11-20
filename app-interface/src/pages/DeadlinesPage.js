@@ -26,7 +26,6 @@ function DeadlinesPage() {
 
   const [activeTab, setActiveTab] = useState('active');
 
-  // ---------------- Add Deadline ----------------
   const handleSubmitDeadline = async (formData) => {
     const dueAt = `${formData.dueDate}T${formData.dueTime}`;
     const deadlineData = {
@@ -49,7 +48,6 @@ function DeadlinesPage() {
     }
   };
 
-  // ---------------- Edit Deadline ----------------
   const handleEditDeadline = async (formData) => {
     if (!editingDeadline) return;
 
@@ -72,7 +70,6 @@ function DeadlinesPage() {
     }
   };
 
-  // ---------------- Delete Deadline ----------------
   const handleDeleteDeadline = async () => {
     if (!deletingDeadline) return;
     try {
@@ -86,7 +83,6 @@ function DeadlinesPage() {
     }
   };
 
-  // ---------------- Toggle Complete ----------------
   const handleToggleComplete = async (deadline) => {
     try {
       const updated = { ...deadline, completed: !deadline.completed };
@@ -97,7 +93,6 @@ function DeadlinesPage() {
     }
   };
 
-  // ---------------- Menu Click ----------------
   const handleMenuClick = (deadline, action) => {
     if (action === 'reminder') {
       const updatedDeadline = { ...deadline, pinned: !deadline.pinned };
@@ -112,7 +107,6 @@ function DeadlinesPage() {
     }
   };
 
-  // ---------------- Toggle Widget ----------------
   const handleToggleWidget = (deadline) => {
     setHiddenWidgets(prev => {
       const newSet = new Set(prev);
@@ -122,7 +116,6 @@ function DeadlinesPage() {
     });
   };
 
-  // ---------------- Formatting ----------------
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
@@ -133,7 +126,6 @@ function DeadlinesPage() {
   };
   const formatDateTime = (dateString) => `${formatDate(dateString)} - ${formatTime(dateString)}`;
 
-  // ---------------- Filter & Sort ----------------
   const filteredDeadlines = deadlines
     .filter(d => activeTab === 'active' ? !d.completed : d.completed)
     .sort((a, b) => {
@@ -191,7 +183,7 @@ function DeadlinesPage() {
 
       <AddButton label="Add Deadline +" onClick={() => setShowAddModal(true)} />
 
-      {/* Modals */}
+      {}
       <DeadlineModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}

@@ -146,7 +146,7 @@ class NotionService {
           title: title || 'Untitled Event',
           description: description,
           startTime: date || new Date().toISOString(),
-          endTime: date || new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour later
+          endTime: date || new Date(Date.now() + 60 * 60 * 1000).toISOString(), 
           completed: completed,
           source: 'notion'
         };
