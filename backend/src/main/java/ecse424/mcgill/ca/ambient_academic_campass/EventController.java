@@ -41,6 +41,8 @@ public class EventController {
                 event.setStartTime(updatedEvent.getStartTime());
                 event.setEndTime(updatedEvent.getEndTime());
                 event.setCompleted(updatedEvent.isCompleted());
+                event.setNotificationEnabled(updatedEvent.isNotificationEnabled());
+                event.setNotificationMinutesBefore(updatedEvent.getNotificationMinutesBefore());
                 return eventRepository.save(event);
             })
             .orElseThrow(() -> new RuntimeException("Event not found"));

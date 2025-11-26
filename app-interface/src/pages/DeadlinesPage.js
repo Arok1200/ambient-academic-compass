@@ -36,7 +36,9 @@ function DeadlinesPage() {
       completed: false,
       pinned: false,
       iconIndex: formData.iconIndex,
-      colorIndex: formData.colorIndex
+      colorIndex: formData.colorIndex,
+      notificationEnabled: formData.notificationEnabled || false,
+      notificationMinutesBefore: formData.notificationEnabled ? formData.notificationMinutesBefore : null
     };
 
     try {
@@ -57,7 +59,9 @@ function DeadlinesPage() {
       title: formData.title,
       dueAt: `${formData.dueDate}T${formData.dueTime}:00`,
       iconIndex: formData.iconIndex,
-      colorIndex: formData.colorIndex
+      colorIndex: formData.colorIndex,
+      notificationEnabled: formData.notificationEnabled || false,
+      notificationMinutesBefore: formData.notificationEnabled ? formData.notificationMinutesBefore : null
     };
 
     try {

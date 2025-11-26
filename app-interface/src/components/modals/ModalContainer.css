@@ -132,3 +132,9 @@
   justify-content: center;
   gap: 12px;
 }
+
+.left-checkbox {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
