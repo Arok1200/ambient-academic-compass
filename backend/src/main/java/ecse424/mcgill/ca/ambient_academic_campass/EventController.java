@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,6 +31,19 @@ public class EventController {
     @PostMapping
     public Event createEvent(@RequestBody Event event) {
         return eventRepository.save(event);
+    }
+
+    @PutMapping("/{id}")
+    public Event updateEvent(@PathVariable Long id, @RequestBody Event updatedEvent) {
+        return eventRepository.findById(id)
+            .map(event -> {
+                event.setTitle(updatedEvent.getTitle());
+                event.setStartTime(updatedEvent.getStartTime());
+                event.setEndTime(updatedEvent.getEndTime());
+                event.setCompleted(updatedEvent.isCompleted());
+                return eventRepository.save(event);
+            })
+            .orElseThrow(() -> new RuntimeException("Event not found"));
     }
 
     // Delete an event by ID

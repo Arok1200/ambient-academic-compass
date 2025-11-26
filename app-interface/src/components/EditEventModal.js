@@ -2,23 +2,33 @@ import React, { useState } from "react";
 import "./AddEventModal.css";
 
 export default function EditEventModal({ event, onClose, onSubmit }) {
+
+  const formatTime = (isoString) => {
+    const date = new Date(isoString);
+    const hrs = String(date.getHours()).padStart(2, "0");
+    const mins = String(date.getMinutes()).padStart(2, "0");
+    return `${hrs}:${mins}`;
+  };
+
   const [title, setTitle] = useState(event.title);
   const [date, setDate] = useState(event.startTime.split("T")[0]);
-  const [startTime, setStartTime] = useState(event.startTime.split("T")[1].slice(0,5));
-  const [endTime, setEndTime] = useState(event.endTime.split("T")[1].slice(0,5));
+  const [startTime, setStartTime] = useState(formatTime(event.startTime));
+  const [endTime, setEndTime] = useState(formatTime(event.endTime));
 
   const handleConfirm = () => {
     if (!title || !date || !startTime || !endTime) {
       alert("Please fill all fields.");
       return;
     }
+
     const updatedEvent = {
       id: event.id,
       title,
       startTime: `${date}T${startTime}:00`,
       endTime: `${date}T${endTime}:00`,
-      completed: event.completed,
+      completed: event.completed
     };
+
     onSubmit(updatedEvent);
   };
 
