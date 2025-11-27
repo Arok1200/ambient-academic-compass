@@ -7,6 +7,7 @@ import AddButton from "../components/AddButton";
 import AddEventModal from "../components/AddEventModal";
 import EditEventModal from "../components/EditEventModal";
 import DeleteEventModal from "../components/DeleteEventModal";
+import EventItem from "../components/EventItem";
 import "./EventsPage.css";
 
 // Edit pencil
@@ -105,37 +106,28 @@ export default function EventsPage() {
           <p className="events-message">No events for this day.</p>
         )}
 
-        {!loading &&
-          eventsForSelectedDay.map((event) => (
-            <div key={event.id} className="deadlines-content">
-              <div className="deadlines-list-bordered">
-                <div className="event-row">
-                  <div className="event-info">
-                    <div className="event-title">{event.title}</div>
-                    <div className="event-datetime">
-                      {formatDateTime(event.startTime, event.endTime)}
-                    </div>
-                  </div>
-
-                  <div className="event-actions">
-                    <button
-                      onClick={() => setEditEvent(event)}
-                      className="deadline-icon-btn"
-                    >
-                      <EditIcon />
-                    </button>
-
-                    <button
-                      onClick={() => setDeleteEvent(event)}
-                      className="deadline-icon-btn"
-                    >
-                      <DeleteIcon />
-                    </button>
-                  </div>
-                </div>
-              </div>
+        {!loading && eventsForSelectedDay.map((event) => (
+          <div key={event.id} className="deadlines-content">
+            <div className="deadlines-list-bordered">
+              <EventItem
+                title={event.title}
+                datetime={formatDateTime(event.startTime, event.endTime)}
+                isReminderOn={!!event.notificationEnabled}
+                onToggleReminder={async () => {
+                  const updated = { ...event, notificationEnabled: !event.notificationEnabled };
+                  try {
+                    await axios.put(`${API_BASE_URL}/events/${event.id}`, updated);
+                    await loadData();
+                  } catch (err) {
+                    console.error('Failed to toggle reminder on event:', err);
+                  }
+                }}
+                onEdit={() => setEditEvent(event)}
+                onDelete={() => setDeleteEvent(event)}
+              />
             </div>
-          ))}
+          </div>
+        ))}
       </div>
 
       {/* Add event button */}

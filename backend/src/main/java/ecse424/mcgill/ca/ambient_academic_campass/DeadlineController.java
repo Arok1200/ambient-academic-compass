@@ -44,6 +44,7 @@ public class DeadlineController {
                 deadline.setColorIndex(updatedDeadline.getColorIndex());
                 deadline.setNotificationEnabled(updatedDeadline.isNotificationEnabled());
                 deadline.setNotificationMinutesBefore(updatedDeadline.getNotificationMinutesBefore());
+                deadline.setWidget(updatedDeadline.isWidget());
                 return deadlineRepository.save(deadline);
             })
             .orElseThrow(() -> new RuntimeException("Deadline not found with id: " + id));

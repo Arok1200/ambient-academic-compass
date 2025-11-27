@@ -9,7 +9,7 @@ const OutlineBellIcon = () => (
 );
 
 const FilledBellIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
   </svg>
@@ -29,33 +29,31 @@ const DeleteIcon = () => (
   </svg>
 );
 
-function DeadlineItem({ 
+function DeadlineItem({
   icon,
   color,
   date,
-  time,
   title,
   isCompleted,
   onComplete,
   onMenuClick,
   showWidget,
   onWidgetToggle,
-  selected = false,
   isReminderOn,
-  isOverdue = false
+  isOverdue
 }) {
   return (
-    <div className={`deadline-item-row ${selected ? 'selected' : ''}`}>
+    <div className="deadline-item-row">
       <div className="deadline-checkbox-container">
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           className="deadline-checkbox-figma"
           checked={isCompleted}
           onChange={onComplete}
         />
       </div>
 
-      <div 
+      <div
         className="deadline-color-box"
         style={{
           backgroundColor: color.bg,
@@ -67,57 +65,49 @@ function DeadlineItem({
 
       <div className="deadline-text-section">
         <div className="deadline-title-text">{title}</div>
-        <div className="deadline-datetime-text">
-          {date}{time && ` • ${time}`}
-        </div>
+        <div className="deadline-datetime-text">{date}</div>
       </div>
 
       <div className="deadline-actions-section">
-        <div className="deadline-actions-section">
+        {/* Reminder */}
+        <button
+          type="button"
+          className={`icon-btn deadline-icon-btn ${isReminderOn ? 'active' : ''}`}
+          onClick={() => onMenuClick?.('reminder')}
+          title="Reminder"
+        >
+          {isReminderOn ? <FilledBellIcon /> : <OutlineBellIcon />}
+        </button>
 
-          {}
-          <button 
-            type="button"
-            className={`icon-btn deadline-icon-btn ${isReminderOn ? 'active' : ''}`}
-            onClick={() => onMenuClick?.('reminder')}
-            title="Reminder"
-          >
-            {isReminderOn ? (
-              <FilledBellIcon />
-            ) : (
-              <OutlineBellIcon />
-            )}
-          </button>
+        {/* Edit */}
+        <button
+          className="icon-btn deadline-icon-btn"
+          onClick={() => onMenuClick?.('edit')}
+          title="Edit"
+        >
+          <EditIcon />
+        </button>
 
-          {}
-          <button 
-            className="icon-btn deadline-icon-btn"
-            onClick={() => onMenuClick?.('edit')}
-            title="Edit"
-          >
-            <EditIcon />
-          </button>
+        {/* Delete */}
+        <button
+          className="icon-btn deadline-icon-btn"
+          onClick={() => onMenuClick?.('delete')}
+          title="Delete"
+        >
+          <DeleteIcon />
+        </button>
 
-          {}
-          <button 
-            className="icon-btn deadline-icon-btn"
-            onClick={() => onMenuClick?.('delete')}
-            title="Delete"
-          >
-            <DeleteIcon />
-          </button>
-
-          {}
-          <button 
-            className={`deadline-widget-btn ${!showWidget ? 'show-widget' : ''} ${isOverdue ? 'disabled' : ''}`}
-            onClick={onWidgetToggle}
-            disabled={isOverdue}
-            title={isOverdue ? "Cannot show widget for overdue deadline" : ""}
-          >
-            {isOverdue ? 'Overdue' : (showWidget ? 'Hide Widget' : 'Show Widget')}
-          </button>
-
-        </div>
+        {/* Widget Toggle */}
+        <button
+          type="button"
+          className={`deadline-widget-btn ${!showWidget ? 'show-widget' : ''} ${
+            isOverdue ? 'disabled' : ''
+          }`}
+          onClick={() => onMenuClick?.('widget')}
+          disabled={isOverdue}
+        >
+          {isOverdue ? 'Overdue' : (showWidget ? 'Hide Widget' : 'Show Widget')}
+        </button>
       </div>
     </div>
   );

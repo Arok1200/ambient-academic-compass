@@ -17,28 +17,37 @@ import groupDiscussionIcon from '../assets/icons/group-discussion.svg';
 const ICON_MAP = [assignmentIcon, quizIcon, studyingIcon, cleanIcon, groupDiscussionIcon];
 
 function DeadlinesPage() {
-  const { deadlines, setDeadlines, loadData, loading, visibleWidgets, setVisibleWidgets } = useData();
+  const { deadlines, setDeadlines, loadData, loading } = useData();
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editingDeadline, setEditingDeadline] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deletingDeadline, setDeletingDeadline] = useState(null);
+
   const [maxWidgetsModalOpen, setMaxWidgetsModalOpen] = useState(false);
 
   const [activeTab, setActiveTab] = useState('active');
 
+  // ------------------------- CREATE DEADLINE -------------------------
   const handleSubmitDeadline = async (formData) => {
     const dueAt = `${formData.dueDate}T${formData.dueTime}`;
+
     const deadlineData = {
       title: formData.title,
       description: '',
       dueAt,
       completed: false,
-      pinned: false,
       iconIndex: formData.iconIndex,
       colorIndex: formData.colorIndex,
+
+      // Notifications
       notificationEnabled: formData.notificationEnabled || false,
-      notificationMinutesBefore: formData.notificationEnabled ? formData.notificationMinutesBefore : null
+      notificationMinutesBefore:
+        formData.notificationEnabled ? formData.notificationMinutesBefore : null,
+
+      // Widget (always false when creating)
+      widget: false
     };
 
     try {
@@ -47,10 +56,11 @@ function DeadlinesPage() {
       setShowAddModal(false);
     } catch (error) {
       console.error('Failed to add deadline:', error);
-      alert('Failed to add deadline. Please check the date/time format and try again.');
+      alert('Failed to add deadline.');
     }
   };
 
+  // ------------------------- EDIT DEADLINE -------------------------
   const handleEditDeadline = async (formData) => {
     if (!editingDeadline) return;
 
@@ -60,134 +70,219 @@ function DeadlinesPage() {
       dueAt: `${formData.dueDate}T${formData.dueTime}:00`,
       iconIndex: formData.iconIndex,
       colorIndex: formData.colorIndex,
+
       notificationEnabled: formData.notificationEnabled || false,
-      notificationMinutesBefore: formData.notificationEnabled ? formData.notificationMinutesBefore : null
+      notificationMinutesBefore:
+        formData.notificationEnabled ? formData.notificationMinutesBefore : null
     };
 
     try {
       await axios.put(`${API_BASE_URL}/deadlines/${editingDeadline.id}`, updatedDeadline);
-      setDeadlines(prev => prev.map(d => (d.id === editingDeadline.id ? updatedDeadline : d)));
+      setDeadlines((prev) =>
+        prev.map((d) => (d.id === editingDeadline.id ? updatedDeadline : d))
+      );
       setEditModalOpen(false);
       setEditingDeadline(null);
-    } catch (error) {
-      console.error('Failed to edit deadline:', error);
+    } catch {
       alert('Failed to update deadline');
     }
   };
 
+  // ------------------------- DELETE DEADLINE -------------------------
   const handleDeleteDeadline = async () => {
     if (!deletingDeadline) return;
+
     try {
       await axios.delete(`${API_BASE_URL}/deadlines/${deletingDeadline.id}`);
-      setDeadlines(prev => prev.filter(d => d.id !== deletingDeadline.id));
+      setDeadlines((prev) => prev.filter((d) => d.id !== deletingDeadline.id));
       setDeleteModalOpen(false);
       setDeletingDeadline(null);
-    } catch (error) {
-      console.error('Failed to delete deadline:', error);
+    } catch {
       alert('Failed to delete deadline');
     }
   };
 
+  // ------------------------- COMPLETE/INCOMPLETE -------------------------
   const handleToggleComplete = async (deadline) => {
     try {
       const updated = { ...deadline, completed: !deadline.completed };
       await axios.put(`${API_BASE_URL}/deadlines/${deadline.id}`, updated);
-      setDeadlines(prev => prev.map(d => d.id === deadline.id ? updated : d));
-    } catch (error) {
-      console.error('Failed to update deadline:', error);
+
+      setDeadlines((prev) =>
+        prev.map((d) => (d.id === deadline.id ? updated : d))
+      );
+    } catch {
+      console.error('Failed to toggle complete');
     }
   };
 
+  // ------------------------- REMINDER / EDIT / DELETE -------------------------
   const handleMenuClick = (deadline, action) => {
     if (action === 'reminder') {
-      const updatedDeadline = { ...deadline, pinned: !deadline.pinned };
-      setDeadlines(prev => prev.map(d => d.id === deadline.id ? updatedDeadline : d));
-      axios.put(`${API_BASE_URL}/deadlines/${deadline.id}`, updatedDeadline).catch(console.error);
-    } else if (action === 'edit') {
+      const updated = {
+        ...deadline,
+        notificationEnabled: !deadline.notificationEnabled
+      };
+
+      setDeadlines((prev) =>
+        prev.map((d) => (d.id === deadline.id ? updated : d))
+      );
+
+      axios.put(`${API_BASE_URL}/deadlines/${deadline.id}`, updated);
+    }
+
+    if (action === 'edit') {
       setEditingDeadline(deadline);
       setEditModalOpen(true);
-    } else if (action === 'delete') {
+    }
+
+    if (action === 'delete') {
       setDeletingDeadline(deadline);
       setDeleteModalOpen(true);
     }
+
+    if (action === 'widget') {
+      // If trying to toggle from false → true, enforce rules
+      const isCurrentlyVisible = deadline.widget;
+      const now = new Date();
+
+      if (!isCurrentlyVisible) {
+        // Count how many deadlines already have widget = true AND are not overdue
+        const activeWidgetsCount = deadlines.filter(
+          (d) => d.widget && new Date(d.dueAt) > now
+        ).length;
+
+        if (activeWidgetsCount >= 5) {
+          // Show max widgets modal
+          setMaxWidgetsModalOpen(true);
+          return;
+        }
+
+        if (new Date(deadline.dueAt) <= now) {
+          // Cannot show overdue deadlines
+          alert("Cannot show widget for overdue deadlines.");
+          return;
+        }
+      }
+
+      // Toggle widget locally
+      const updated = {
+        ...deadline,
+        widget: !deadline.widget
+      };
+
+      setDeadlines((prev) =>
+        prev.map((d) => (d.id === deadline.id ? updated : d))
+      );
+
+      // Persist to backend
+      axios.put(`${API_BASE_URL}/deadlines/${deadline.id}`, updated)
+        .then(() => console.log('Toggled widget for deadline:', deadline.id))
+        .catch(console.error);
+    }
+
   };
 
+  // ------------------------- WIDGET TOGGLE (DB ONLY) -------------------------
   const handleToggleWidget = (deadline) => {
-    const isCurrentlyVisible = visibleWidgets.has(deadline.id);
-    
-    // If trying to show a widget but already have 5 active widgets
-    if (!isCurrentlyVisible && visibleWidgets.size >= 5) {
+    const totalWidgets = deadlines.filter((d) => d.widget).length;
+    const turningOn = !deadline.widget;
+
+    // Enforce max 5
+    if (turningOn && totalWidgets >= 5) {
       setMaxWidgetsModalOpen(true);
       return;
     }
-    
-    setVisibleWidgets(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(deadline.id)) newSet.delete(deadline.id);
-      else newSet.add(deadline.id);
-      return newSet;
-    });
+
+    const updated = { ...deadline, widget: turningOn };
+
+    // Update UI immediately
+    setDeadlines((prev) =>
+      prev.map((d) => (d.id === deadline.id ? updated : d))
+    );
+
+    // Persist to backend
+    axios.put(`${API_BASE_URL}/deadlines/${deadline.id}`, updated);
   };
 
+  // ------------------------- FORMATTERS -------------------------
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
   };
+
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+    return date.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }).toLowerCase();
   };
-  const formatDateTime = (dateString) => `${formatDate(dateString)} - ${formatTime(dateString)}`;
 
+  const formatDateTime = (dateString) =>
+    `${formatDate(dateString)} - ${formatTime(dateString)}`;
+
+  // ------------------------- FILTER DEADLINES -------------------------
   const filteredDeadlines = deadlines
-    .filter(d => activeTab === 'active' ? !d.completed : d.completed)
-    .sort((a, b) => {
-      const dateA = new Date(a.dueAt);
-      const dateB = new Date(b.dueAt);
-      if (dateA < dateB) return -1;
-      if (dateA > dateB) return 1;
-      return a.title.localeCompare(b.title);
-    });
+    .filter((d) => (activeTab === 'active' ? !d.completed : d.completed))
+    .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt));
 
+  // ------------------------- RENDER -------------------------
   return (
     <div className="deadlines-page-container">
       <div className="deadlines-toggle-bar">
-        <button className={`toggle-tab ${activeTab === 'active' ? 'active' : ''}`} onClick={() => setActiveTab('active')}>Active</button>
-        <button className={`toggle-tab ${activeTab === 'completed' ? 'active' : ''}`} onClick={() => setActiveTab('completed')}>Completed</button>
+        <button
+          className={`toggle-tab ${activeTab === 'active' ? 'active' : ''}`}
+          onClick={() => setActiveTab('active')}
+        >
+          Active
+        </button>
+
+        <button
+          className={`toggle-tab ${activeTab === 'completed' ? 'active' : ''}`}
+          onClick={() => setActiveTab('completed')}
+        >
+          Completed
+        </button>
       </div>
 
       <div className="deadlines-content">
         <div className="deadlines-list-bordered">
-          {loading && <p className="deadlines-message">Loading deadlines...</p>}
+          {loading && <p>Loading deadlines...</p>}
+
           {!loading && filteredDeadlines.length === 0 && (
             <p className="deadlines-message">
               {activeTab === 'active'
-                ? 'No active deadlines. Click "Add Deadline +" below to create one!'
-                : 'No completed deadlines yet.'}
+                ? 'No active deadlines.'
+                : 'No completed deadlines.'}
             </p>
           )}
+
           {!loading && filteredDeadlines.length > 0 && (
             <div className="deadlines-list-items">
-              {filteredDeadlines.map(deadline => {
+              {filteredDeadlines.map((deadline) => {
                 const colorDetail = WIDGET_COLOR_DETAILS[deadline.colorIndex || 0];
                 const icon = ICON_MAP[deadline.iconIndex || 0];
                 const isOverdue = new Date(deadline.dueAt) <= new Date();
-                const isWidgetShown = visibleWidgets.has(deadline.id);
-                
+
                 return (
                   <DeadlineItem
                     key={deadline.id}
                     icon={icon}
                     color={colorDetail}
                     date={formatDateTime(deadline.dueAt)}
-                    time=""
                     title={deadline.title}
                     isCompleted={deadline.completed}
                     onComplete={() => handleToggleComplete(deadline)}
                     onMenuClick={(action) => handleMenuClick(deadline, action)}
-                    showWidget={isWidgetShown}
+                    showWidget={deadline.widget}
                     onWidgetToggle={() => handleToggleWidget(deadline)}
-                    isReminderOn={deadline.pinned}
+                    isReminderOn={!!deadline.notificationEnabled}
                     isOverdue={isOverdue}
                   />
                 );
@@ -199,7 +294,7 @@ function DeadlinesPage() {
 
       <AddButton label="Add Deadline +" onClick={() => setShowAddModal(true)} />
 
-      {}
+      {/* Modals */}
       <DeadlineModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
@@ -208,14 +303,20 @@ function DeadlinesPage() {
 
       <EditDeadlineModal
         isOpen={editModalOpen}
-        onClose={() => { setEditModalOpen(false); setEditingDeadline(null); }}
+        onClose={() => {
+          setEditModalOpen(false);
+          setEditingDeadline(null);
+        }}
         onSubmit={handleEditDeadline}
         initialData={editingDeadline}
       />
 
       <DeleteDeadlineModal
         isOpen={deleteModalOpen}
-        onClose={() => { setDeleteModalOpen(false); setDeletingDeadline(null); }}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setDeletingDeadline(null);
+        }}
         onConfirm={handleDeleteDeadline}
         deadline={deletingDeadline}
       />

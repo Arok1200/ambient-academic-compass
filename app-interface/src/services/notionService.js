@@ -157,7 +157,7 @@ class NotionService {
           description: description,
           dueAt: date || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
           completed: completed,
-          pinned: true,
+          notificationEnabled: true,
           source: 'notion'
         };
       }

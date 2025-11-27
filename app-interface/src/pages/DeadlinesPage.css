@@ -60,7 +60,7 @@
 .deadlines-list-items::before {
   content: '';
   position: absolute;
-  right: 152px;
+  right: 157px;
   top: 0;
   bottom: 0;
   width: 1px;
