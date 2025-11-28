@@ -11,10 +11,11 @@
       padding: 0;
       width: 100%;
       height: 100%;
-      background: #1e1e1e url('./icons/saved-screenshots-desktop.jpg') no-repeat center center fixed;
-      background-size: 100% 100%;
+      background: transparent !important;
+      background-color: transparent !important;
       font-family: Arial, sans-serif;
       overflow: hidden;
+      pointer-events: none;
     }
 
     
@@ -28,6 +29,7 @@
     }
 
     .widget {
+      pointer-events: auto;
       width: 58px;
       height: 58px;
       border-radius: 50%;
@@ -70,6 +72,7 @@
 
     
     .timeline-container {
+      pointer-events: auto;
       position: fixed;
       bottom: 100px;
       left: 50%;
@@ -81,6 +84,17 @@
       border-radius: 10px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       z-index: 5;
+    }
+
+    .timeline-passed {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: rgba(0,0,0,0.5); /* semi-transparent grey */
+      z-index: 1;
+      border-radius: 8px;
     }
 
     .event-marker {
@@ -157,6 +171,17 @@
       pointer-events: none;
     }
 
+    .current-time.upcoming {
+      box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
     .time-labels {
       position: fixed;
       bottom: 70px;
@@ -167,7 +192,8 @@
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: #ccc;
+      color: #ffffff;
+      font-weight: 500;
     }
 
     
@@ -297,6 +323,7 @@
   </div>
 
   <div class="timeline-container" id="timeline">
+    <div id="timelinePassed" class="timeline-passed"></div>
     <div class="current-time" id="currentTime"></div>
   </div>
 
@@ -340,6 +367,19 @@
         }
       }
     });
+    
+    // Listen for Electron color updates
+    if (window.electronAPI && window.electronAPI.onUpdateColors) {
+      window.electronAPI.onUpdateColors((colors) => {
+        const timelineContainer = document.querySelector('.timeline-container');
+        if (timelineContainer && colors.backgroundColor) {
+          timelineContainer.style.background = colors.backgroundColor;
+          if (colors.borderColor) {
+            timelineContainer.style.border = `2px solid ${colors.borderColor}`;
+          }
+        }
+      });
+    }
 
     const savedColorIndex = localStorage.getItem('progressBarColorIndex');
     if (savedColorIndex) {

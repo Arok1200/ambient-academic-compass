@@ -7,8 +7,10 @@ import AddButton from "../components/AddButton";
 import AddEventModal from "../components/AddEventModal";
 import EditEventModal from "../components/EditEventModal";
 import DeleteEventModal from "../components/DeleteEventModal";
+import EventItem from "../components/EventItem";
 import "./EventsPage.css";
 
+// Edit pencil
 const EditIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -16,6 +18,7 @@ const EditIcon = () => (
   </svg>
 );
 
+// Trash can
 const DeleteIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
     <polyline points="3 6 5 6 21 6" />
@@ -23,15 +26,16 @@ const DeleteIcon = () => (
   </svg>
 );
 
-function EventsPage() {
+export default function EventsPage() {
   const { events, loading, loadData } = useData();
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [editEvent, setEditEvent] = useState(null);
   const [deleteEvent, setDeleteEvent] = useState(null);
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
+  // Add event
   const handleSubmitEvent = async (newEvent) => {
     try {
       await axios.post(`${API_BASE_URL}/events`, newEvent);
@@ -43,6 +47,7 @@ function EventsPage() {
     }
   };
 
+  // Edit event
   const handleUpdateEvent = async (updatedEvent) => {
     try {
       await axios.put(`${API_BASE_URL}/events/${updatedEvent.id}`, updatedEvent);
@@ -54,9 +59,10 @@ function EventsPage() {
     }
   };
 
-  const handleConfirmDelete = async (eventToDelete) => {
+  // Delete event
+  const handleConfirmDelete = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/events/${eventToDelete.id}`);
+      await axios.delete(`${API_BASE_URL}/events/${deleteEvent.id}`);
       await loadData();
       setDeleteEvent(null);
     } catch (err) {
@@ -65,6 +71,7 @@ function EventsPage() {
     }
   };
 
+  // Filter events by selected date
   const eventsForSelectedDay = events.filter((event) => {
     const eventDate = new Date(event.startTime);
     return (
@@ -74,18 +81,24 @@ function EventsPage() {
     );
   });
 
+  // Format date/time text
   const formatDateTime = (startTime, endTime) => {
     const start = new Date(startTime);
     const end = new Date(endTime);
-    return `${start.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })} - ` +
-           `${start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} ` +
-           `to ${end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+
+    return (
+      `${start.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })} — ` +
+      `${start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })} ` +
+      `to ${end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })}`
+    );
   };
 
   return (
-    <div className="events-page">
+    <div className="events-page-container">
+      {/* Top navigation */}
       <DateNavigation selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
 
+      {/* Events list */}
       <div className="events-list">
         {loading && <p className="events-message">Loading events...</p>}
 
@@ -93,35 +106,34 @@ function EventsPage() {
           <p className="events-message">No events for this day.</p>
         )}
 
-        {!loading && eventsForSelectedDay.length > 0 && (
-          <div className="deadlines-content">
+        {!loading && eventsForSelectedDay.map((event) => (
+          <div key={event.id} className="deadlines-content">
             <div className="deadlines-list-bordered">
-              {eventsForSelectedDay.map((event) => (
-                <div key={event.id} className="event-row">
-                  <div className="event-info">
-                    <div className="event-title">{event.title}</div>
-                    <div className="event-datetime">{formatDateTime(event.startTime, event.endTime)}</div>
-                  </div>
-                  <div className="event-actions">
-                    <button onClick={() => setEditEvent(event)} className="deadline-icon-btn" title="Edit">
-                      <EditIcon />
-                    </button>
-                    <button onClick={() => setDeleteEvent(event)} className="deadline-icon-btn" title="Delete">
-                      <DeleteIcon />
-                    </button>
-                  </div>
-                </div>
-              ))}
+              <EventItem
+                title={event.title}
+                datetime={formatDateTime(event.startTime, event.endTime)}
+                isReminderOn={!!event.notificationEnabled}
+                onToggleReminder={async () => {
+                  const updated = { ...event, notificationEnabled: !event.notificationEnabled };
+                  try {
+                    await axios.put(`${API_BASE_URL}/events/${event.id}`, updated);
+                    await loadData();
+                  } catch (err) {
+                    console.error('Failed to toggle reminder on event:', err);
+                  }
+                }}
+                onEdit={() => setEditEvent(event)}
+                onDelete={() => setDeleteEvent(event)}
+              />
             </div>
           </div>
-        )}
+        ))}
       </div>
 
-
-      {}
+      {/* Add event button */}
       <AddButton label="Add Event +" onClick={() => setShowAddModal(true)} />
 
-      {}
+      {/* Modals */}
       {showAddModal && (
         <AddEventModal
           onClose={() => setShowAddModal(false)}
@@ -141,11 +153,9 @@ function EventsPage() {
         <DeleteEventModal
           event={deleteEvent}
           onClose={() => setDeleteEvent(null)}
-          onConfirm={() => handleConfirmDelete(deleteEvent)}
+          onConfirm={handleConfirmDelete}
         />
       )}
     </div>
   );
 }
-
-export default EventsPage;

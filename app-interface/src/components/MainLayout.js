@@ -199,7 +199,14 @@ function MainLayout({ children }) {
   };
 
   const handleViewDesktop = () => {
-    window.open('/desktop/desktop-sync.html', '_blank');
+    // Check if running in Electron
+    if (window.electronAPI && window.electronAPI.toggleDesktopWidgets) {
+      // Use Electron's desktop overlay functionality
+      window.electronAPI.toggleDesktopWidgets();
+    } else {
+      // Fallback to browser tab for web version
+      window.open('/desktop/desktop-sync.html', '_blank');
+    }
   };
 
   const handleToggleWidgets = () => {
@@ -229,11 +236,20 @@ function MainLayout({ children }) {
       }
     });
 
+    // Send message for browser version (desktop-sync.html in tab/iframe)
     window.postMessage({ 
       type: 'PROGRESS_BAR_COLOR_CHANGE', 
       backgroundColor, 
       borderColor 
     }, '*');
+    
+    // Send message for Electron desktop overlay
+    if (window.electronAPI && window.electronAPI.updateDesktopColors) {
+      window.electronAPI.updateDesktopColors({
+        backgroundColor,
+        borderColor
+      });
+    }
   };
 
   useEffect(() => {
@@ -262,13 +278,14 @@ function MainLayout({ children }) {
 
   const getUpcomingDeadlines = () => {
     if (!deadlines || deadlines.length === 0) return [];
-    
+
     const now = new Date();
     return deadlines
-      .filter(d => visibleWidgets.has(d.id) && new Date(d.dueAt) > now && !d.completed)
+      .filter(d => d.widget && new Date(d.dueAt) > now && !d.completed)
       .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
       .slice(0, 5);
   };
+
 
   const getTodayEvents = () => {
     if (!events || events.length === 0) return [];

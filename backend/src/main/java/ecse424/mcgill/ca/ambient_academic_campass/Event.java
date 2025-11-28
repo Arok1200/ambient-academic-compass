@@ -19,6 +19,8 @@ public class Event {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private boolean completed;
+    private boolean notificationEnabled;
+    private Integer notificationMinutesBefore;
 
     public Event() {}
 
@@ -28,6 +30,8 @@ public class Event {
         this.startTime = startTime;
         this.endTime = endTime;
         this.completed = completed;
+        this.notificationEnabled = false;
+        this.notificationMinutesBefore = null;
     }
 
     public Long getId() {
@@ -72,5 +76,21 @@ public class Event {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public boolean isNotificationEnabled() {
+        return notificationEnabled;
+    }
+
+    public void setNotificationEnabled(boolean notificationEnabled) {
+        this.notificationEnabled = notificationEnabled;
+    }
+
+    public Integer getNotificationMinutesBefore() {
+        return notificationMinutesBefore;
+    }
+
+    public void setNotificationMinutesBefore(Integer notificationMinutesBefore) {
+        this.notificationMinutesBefore = notificationMinutesBefore;
     }
 }

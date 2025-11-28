@@ -11,7 +11,9 @@ function DeadlineModal({ isOpen, onClose, onSubmit, initialData = null }) {
     dueDate: initialData?.dueDate || '',
     dueTime: initialData?.dueTime || '',
     colorIndex: initialData?.colorIndex || 0,
-    iconIndex: initialData?.iconIndex || 0
+    iconIndex: initialData?.iconIndex || 0,
+    notificationEnabled: initialData?.notificationEnabled || false,
+    notificationMinutesBefore: initialData?.notificationMinutesBefore || 30
   });
 
   const handleSubmit = () => {
@@ -29,7 +31,9 @@ function DeadlineModal({ isOpen, onClose, onSubmit, initialData = null }) {
       dueDate: '',
       dueTime: '',
       colorIndex: 0,
-      iconIndex: 0
+      iconIndex: 0,
+      notificationEnabled: false,
+      notificationMinutesBefore: 30
     });
     onClose();
   };
@@ -84,6 +88,49 @@ function DeadlineModal({ isOpen, onClose, onSubmit, initialData = null }) {
           onChange={(index) => setFormData({...formData, iconIndex: index})}
         />
       </div>
+
+      {/* Notification toggle */}
+      <div className="input-row">
+        <label className="modal-label">Reminder:</label>
+        <div className="left-checkbox">
+          <input
+            type="checkbox"
+            checked={formData.notificationEnabled}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                notificationEnabled: e.target.checked,
+              })
+            }
+          />
+          <span style={{ marginLeft: "10px" }}>
+              Enable Notification Reminder
+            </span>
+        </div>
+      </div>
+
+      {/* Notification time */}
+      {formData.notificationEnabled && (
+        <div className="input-row">
+          <label className="modal-label">Notify Before:</label>
+          <select
+            className="modal-input"
+            value={formData.notificationMinutesBefore}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                notificationMinutesBefore: parseInt(e.target.value),
+              })
+            }
+          >
+            <option value={5}>5 minutes</option>
+            <option value={10}>10 minutes</option>
+            <option value={15}>15 minutes</option>
+            <option value={30}>30 minutes</option>
+            <option value={60}>1 hour</option>
+          </select>
+        </div>
+      )}
     </ModalContainer>
   );
 }
