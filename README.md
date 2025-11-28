@@ -116,6 +116,9 @@ cd backend
 ./mvnw test                      # Run tests
 ./mvnw clean package             # Build JAR
 ```
+## Demo video
+
+🎥 Video Demo: https://vimeo.com/1139468578?share=copy&fl=sv&fe=ci
 
 ## API Endpoints
 

@@ -2,7 +2,7 @@
   display: flex;
   align-items: stretch;
   gap: 14px;
-  padding: 4px 24px;
+  padding: 4px 14px;
   background: white;
   border-bottom: 1px solid #000;
   min-height: 70px;
@@ -140,7 +140,7 @@
   white-space: nowrap;
   transition: all 0.2s;
   min-width: 125px;
-  margin-left: 10px;
+  margin-left: 25px;
 }
 
 .deadline-widget-btn.show-widget {

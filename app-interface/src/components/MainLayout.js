@@ -278,13 +278,14 @@ function MainLayout({ children }) {
 
   const getUpcomingDeadlines = () => {
     if (!deadlines || deadlines.length === 0) return [];
-    
+
     const now = new Date();
     return deadlines
-      .filter(d => visibleWidgets.has(d.id) && new Date(d.dueAt) > now && !d.completed)
+      .filter(d => d.widget && new Date(d.dueAt) > now && !d.completed)
       .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
       .slice(0, 5);
   };
+
 
   const getTodayEvents = () => {
     if (!events || events.length === 0) return [];

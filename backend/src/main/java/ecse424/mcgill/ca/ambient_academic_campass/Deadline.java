@@ -20,6 +20,9 @@ public class Deadline {
     private boolean pinned;
     private Integer iconIndex;
     private Integer colorIndex;
+    private boolean notificationEnabled;
+    private Integer notificationMinutesBefore;
+    private boolean widget;
 
     public Deadline() {}
 
@@ -31,6 +34,9 @@ public class Deadline {
         this.pinned = pinned;
         this.iconIndex = 0;
         this.colorIndex = 0;
+        this.notificationEnabled = false;
+        this.notificationMinutesBefore = null;
+        this.widget = false;
     }
 
     public Long getId() {
@@ -91,5 +97,29 @@ public class Deadline {
 
     public void setColorIndex(Integer colorIndex) {
         this.colorIndex = colorIndex;
+    }
+
+    public boolean isNotificationEnabled() {
+        return notificationEnabled;
+    }
+
+    public void setNotificationEnabled(boolean notificationEnabled) {
+        this.notificationEnabled = notificationEnabled;
+    }
+
+    public Integer getNotificationMinutesBefore() {
+        return notificationMinutesBefore;
+    }
+
+    public void setNotificationMinutesBefore(Integer notificationMinutesBefore) {
+        this.notificationMinutesBefore = notificationMinutesBefore;
+    }
+
+    public boolean isWidget() {
+        return widget;
+    }
+
+    public void setWidget(boolean widgetEnabled) {
+        this.widget = widgetEnabled;
     }
 }

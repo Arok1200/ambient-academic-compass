@@ -39,7 +39,7 @@ export default function SettingsModal({ isOpen, onClose }) {
               checked={timeFormat === "24hr"}
               onChange={() => setTimeFormat("24hr")}
             />
-            <span>Time Format: 24-hour</span>
+            <span>Time Format: 24-hour <i>(Coming soon!)</i></span>
           </div>
         </div>
 
@@ -64,36 +64,7 @@ export default function SettingsModal({ isOpen, onClose }) {
               checked={appearance === "dark"}
               onChange={() => setAppearance("dark")}
             />
-            <span>Dark Mode</span>
-          </div>
-
-          <div className="sync-modal-option" onClick={() => setAppearance("system")}>
-            <input
-              type="radio"
-              checked={appearance === "system"}
-              onChange={() => setAppearance("system")}
-            />
-            <span>Use System Setting</span>
-          </div>
-        </div>
-
-        {/* ===================== NOTIFICATIONS ===================== */}
-        <h3 className="sync-modal-title" style={{ fontSize: "1.2rem", marginTop: "1.5rem" }}>
-          Notifications
-        </h3>
-
-        <div className="sync-modal-options">
-          <div
-            className="sync-modal-option"
-            onClick={() => setNotifications(!notifications)}
-          >
-            <input
-              type="checkbox"
-              checked={notifications}
-              onChange={() => setNotifications(!notifications)}
-              style={{ width: "1.25rem", height: "1.25rem" }}
-            />
-            <span>Enable Notifications</span>
+            <span>Dark Mode <i>(Coming soon!)</i></span>
           </div>
         </div>
 

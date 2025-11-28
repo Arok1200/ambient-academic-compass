@@ -29,6 +29,20 @@ export const DataProvider = ({ children }) => {
       ]);
       setEvents(eventsResponse.data);
       setDeadlines(deadlinesResponse.data);
+
+      // Initialize visible widgets from backend `widget` flag (fallback to `notificationEnabled`)
+      try {
+        const initialWidgetIds = (deadlinesResponse.data || [])
+          .filter(d => (typeof d.widget !== 'undefined' ? d.widget : d.notificationEnabled))
+          .map(d => d.id);
+
+        if (initialWidgetIds.length > 0) {
+          setVisibleWidgets(new Set(initialWidgetIds));
+        }
+      } catch (e) {
+        // Ignore initialization errors and keep default visibleWidgets
+        console.warn('Failed to initialize visible widgets from backend', e);
+      }
     } catch (err) {
       console.warn('Backend not available, using empty data:', err.message);
       setEvents([]);
