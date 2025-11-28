@@ -83,6 +83,17 @@
       z-index: 5;
     }
 
+    .timeline-passed {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: rgba(0,0,0,0.5); /* semi-transparent grey */
+      z-index: 1;
+      border-radius: 8px;
+    }
+
     .event-marker {
       position: absolute;
       top: 0;
@@ -155,6 +166,17 @@
       border-radius: 50%;
       z-index: 15;
       pointer-events: none;
+    }
+
+    .current-time.upcoming {
+      box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.3); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
     }
 
     .time-labels {
@@ -297,6 +319,7 @@
   </div>
 
   <div class="timeline-container" id="timeline">
+    <div id="timelinePassed" class="timeline-passed"></div>
     <div class="current-time" id="currentTime"></div>
   </div>
 

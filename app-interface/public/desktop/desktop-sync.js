@@ -47,20 +47,18 @@ async function fetchData() {
 
 function renderWidgets() {
   const dock = document.getElementById('widgetDock');
-  
-  const existingWidgets = dock.querySelectorAll('.widget');
-  existingWidgets.forEach(w => w.remove());
-  
+  dock.querySelectorAll('.widget').forEach(w => w.remove());
+
+  const now = new Date();
+
   const upcomingDeadlines = deadlines
-    .filter(d => !d.completed && new Date(d.dueAt) > new Date())
+    .filter(d => d.widget && !d.completed && new Date(d.dueAt) > now)
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
     .slice(0, 5);
   
   upcomingDeadlines.forEach((deadline, index) => {
     const widget = document.createElement('div');
     widget.className = 'widget';
-    if (index === 0) widget.classList.add('upcoming');
-    
     const colorIndex = deadline.colorIndex ?? 0;
     const iconIndex = deadline.iconIndex ?? 0;
     const color = WIDGET_COLOR_DETAILS[colorIndex % WIDGET_COLOR_DETAILS.length];
@@ -89,6 +87,14 @@ function renderWidgets() {
     img.src = icon;
     img.alt = deadline.title;
     widget.appendChild(img);
+
+    if (deadline.notificationEnabled) {
+      const dueTime = new Date(deadline.dueAt);
+      const notifyTime = new Date(dueTime.getTime() - (deadline.notificationMinutesBefore ?? 0) * 60000);
+      if (now >= notifyTime && now <= dueTime) {
+        widget.classList.add('upcoming');
+      }
+    }
     
     widget.addEventListener('click', (e) => handleWidgetClick(e, widget));
     
@@ -98,10 +104,8 @@ function renderWidgets() {
 
 function renderTimeline() {
   const timeline = document.getElementById('timeline');
-  
-  const existingMarkers = timeline.querySelectorAll('.event-marker, .event-label');
-  existingMarkers.forEach(m => m.remove());
-  
+  timeline.querySelectorAll('.event-marker, .event-label').forEach(m => m.remove());
+
   const now = new Date();
   const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
   const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
@@ -116,14 +120,9 @@ function renderTimeline() {
     const eventEnd = new Date(event.endTime);
     const isEven = index % 2 === 0;
     
-    const startHours = eventStart.getHours();
-    const startMinutes = eventStart.getMinutes();
-    const startTotalMinutes = startHours * 60 + startMinutes;
+    const startTotalMinutes = eventStart.getHours() * 60 + eventStart.getMinutes();
+    const endTotalMinutes = eventEnd.getHours() * 60 + eventEnd.getMinutes();
     const startPosition = (startTotalMinutes / 1440) * 100;
-    
-    const endHours = eventEnd.getHours();
-    const endMinutes = eventEnd.getMinutes();
-    const endTotalMinutes = endHours * 60 + endMinutes;
     const endPosition = (endTotalMinutes / 1440) * 100;
     
     const width = endPosition - startPosition;
@@ -132,21 +131,10 @@ function renderTimeline() {
     marker.className = 'event-marker';
     marker.style.left = `${startPosition}%`;
     marker.style.width = `${width}%`;
-    
+
     const label = document.createElement('div');
     label.className = isEven ? 'event-label label-above' : 'event-label label-below';
     label.style.left = `${startPosition + (width / 2)}%`;
-    
-    const startStr = eventStart.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
-    const endStr = eventEnd.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
-    });
     
     const nameDiv = document.createElement('div');
     nameDiv.className = 'event-name';
@@ -154,8 +142,8 @@ function renderTimeline() {
     
     const timeDiv = document.createElement('div');
     timeDiv.className = 'event-time';
-    timeDiv.textContent = `${startStr} - ${endStr}`;
-    
+    timeDiv.textContent = `${eventStart.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${eventEnd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+
     label.appendChild(nameDiv);
     label.appendChild(timeDiv);
     
@@ -168,13 +156,43 @@ function renderTimeline() {
 
 function updateCurrentTime() {
   const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const seconds = now.getSeconds();
-  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const totalSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
   const position = (totalSeconds / 86400) * 100;
+
+  const currentTimeMarker = document.getElementById('currentTime');
+  currentTimeMarker.style.left = `${position}%`;
   
-  document.getElementById('currentTime').style.left = `${position}%`;
+  const passedEl = document.getElementById('timelinePassed');
+  passedEl.style.width = `${position}%`; // overlay extends to current time
+
+  // --- Glow logic for current-time marker ---
+  const shouldGlow = events.some(event => {
+    if (!event.notificationEnabled) return false;
+    const eventStart = new Date(event.startTime);
+    const notifyTime = new Date(eventStart.getTime() - (event.notificationMinutesBefore ?? 0) * 60000);
+    return now >= notifyTime && now <= eventStart;
+  });
+
+  currentTimeMarker.classList.toggle('upcoming', shouldGlow);
+}
+
+
+
+function handleWidgetClick(e, widget) {
+  e.stopPropagation();
+  const widgetPopup = document.getElementById('widgetPopup');
+  const popupText = document.getElementById('popupText');
+
+  popupText.textContent = widget.dataset.title;
+  widgetPopup.style.background = widget.dataset.color;
+  widgetPopup.style.border = `3px solid ${widget.dataset.border}`;
+
+  const rect = widget.getBoundingClientRect();
+  widgetPopup.style.left = (rect.left + rect.width / 2 + 30) + 'px';
+  widgetPopup.style.bottom = (window.innerHeight - rect.bottom + rect.height + 20) + 'px';
+
+  widgetPopup.classList.add('show');
+  activeWidget = widget;
 }
 
 function handleWidgetClick(e, widget) {
