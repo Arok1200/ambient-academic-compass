@@ -220,6 +220,20 @@ ipcMain.handle('update-desktop-colors', (event, colors) => {
   }
 });
 
+ipcMain.on("overlay-accept-events", (event, accept) => {
+  if (desktopOverlay && !desktopOverlay.isDestroyed()) {
+    try {
+      if (accept) {
+        desktopOverlay.setIgnoreMouseEvents(false); // stop passing through
+      } else {
+        desktopOverlay.setIgnoreMouseEvents(true, { forward: true }); // resume passthrough
+      }
+    } catch (err) {
+      console.error("Failed to set overlay ignoreMouseEvents:", err);
+    }
+  }
+});
+
 // App Event Handlers
 app.whenReady().then(() => {
   createMainWindow();

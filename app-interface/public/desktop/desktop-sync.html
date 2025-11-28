@@ -57,6 +57,7 @@
     }
 
     .widget.upcoming {
+      pointer-events: auto;
       animation: bubbleBlink 2s infinite ease-in-out;
     }
 
@@ -200,6 +201,7 @@
     .widget-popup,
     .confirm-popup,
     .done-popup {
+      pointer-events: auto;
       position: absolute;
       display: none;
       background: white;
@@ -216,6 +218,7 @@
     }
 
     .widget-popup {
+      pointer-events: auto;
       align-items: center;
       justify-content: space-between;
       font-size: 16px;
@@ -316,7 +319,7 @@
 </head>
 
 <body>
-
+  <div id = "overlay">
   <div class="loading" id="loading">Loading data...</div>
 
   <div class="dock" id="widgetDock">
@@ -434,5 +437,6 @@
       }
     }
   </script>
+  </div>
 </body>
 </html>

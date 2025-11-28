@@ -19,5 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.on('update-colors', (event, colors) => {
       callback(colors);
     });
-  }
+  },
+
+  setOverlayAcceptsMouse: (accept) => ipcRenderer.send('overlay-accept-events', accept)
 });
