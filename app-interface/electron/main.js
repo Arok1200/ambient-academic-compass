@@ -75,6 +75,8 @@ function createDesktopOverlay() {
   // Make it truly ambient across all workspaces and apps
   desktopOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   desktopOverlay.setAlwaysOnTop(true, 'screen-saver', 1);
+  // Show overlay
+  desktopOverlay.setIgnoreMouseEvents(true, { forward: true });
   
   // Additional macOS-specific settings for maximum ambient visibility
   if (process.platform === 'darwin') {
@@ -91,7 +93,7 @@ function createDesktopOverlay() {
       // setWindowLevel might not be available
     }
     // Ensure it doesn't interfere with other windows
-    desktopOverlay.setIgnoreMouseEvents(false);
+    //desktopOverlay.setIgnoreMouseEvents(false);
   }
 
   // Prevent the overlay from ever being hidden
