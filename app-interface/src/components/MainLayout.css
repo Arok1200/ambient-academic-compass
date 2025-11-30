@@ -687,6 +687,18 @@ button.add-event:hover {
   padding: 5rem 0;
 }
 
+.timeline-passed {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: rgba(0,0,0,0.5); /* semi-transparent grey */
+      z-index: 1;
+      border-radius: 8px;
+    }
+
 .timeline-bar {
   position: relative;
   height: 30px;             

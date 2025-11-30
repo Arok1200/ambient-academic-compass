@@ -74,10 +74,7 @@ async function fetchData() {
 
 function renderWidgets() {
   const dock = document.getElementById('widgetDock');
-  if (!dock) {
-    console.warn('widgetDock not found');
-    return;
-  }
+  if (!dock) return;
 
   const now = new Date();
 
@@ -86,59 +83,38 @@ function renderWidgets() {
     .sort((a, b) => new Date(a.dueAt) - new Date(b.dueAt))
     .slice(0, 5);
 
-  // Keep track of current widgets by deadlineId
   const existingWidgets = {};
-  dock.querySelectorAll('.widget').forEach(widget => {
-    const id = widget.dataset.deadlineId;
-    if (id) existingWidgets[id] = widget;
+  dock.querySelectorAll('.widget').forEach(w => {
+    existingWidgets[w.dataset.deadlineId] = w;
   });
 
   upcomingDeadlines.forEach((deadline, index) => {
-    const colorIndex = deadline.colorIndex ?? 0;
-    const iconIndex = deadline.iconIndex ?? 0;
-    const color = WIDGET_COLOR_DETAILS[colorIndex % WIDGET_COLOR_DETAILS.length];
-    const icon = WIDGET_ICONS[iconIndex % WIDGET_ICONS.length];
+    const color = WIDGET_COLOR_DETAILS[deadline.colorIndex ?? 0 % WIDGET_COLOR_DETAILS.length];
+    const icon = WIDGET_ICONS[deadline.iconIndex ?? 0 % WIDGET_ICONS.length];
 
     let widget = existingWidgets[deadline.id];
-
     if (!widget) {
-      // create new widget only if it doesn't exist
       widget = document.createElement('div');
       widget.className = 'widget clickable';
       widget.dataset.deadlineId = deadline.id;
-      widget.dataset.title = `${deadline.title} - due ${new Date(deadline.dueAt).toLocaleString()}`;
 
       const img = document.createElement('img');
       img.src = icon;
       img.alt = deadline.title;
       widget.appendChild(img);
 
-      widget.addEventListener('click', (e) => handleWidgetClick(e, widget));
-
+      widget.addEventListener('click', e => handleWidgetClick(e, widget));
       dock.appendChild(widget);
+      attachClickableListeners(widget);
     }
 
-    // update widget colors and title
+    // Update attributes & styles
+    widget.dataset.title = `${deadline.title} - due ${new Date(deadline.dueAt).toLocaleString()}`;
     widget.style.background = color.bg;
     widget.style.border = `4px solid ${color.border}`;
     widget.dataset.color = color.bg;
     widget.dataset.border = color.border;
-    widget.dataset.title = `${deadline.title} - due ${new Date(deadline.dueAt).toLocaleString()}`;
 
-    // update notification/upcoming status
-    if (deadline.notificationEnabled) {
-      const dueTime = new Date(deadline.dueAt);
-      const notifyTime = new Date(dueTime.getTime() - (deadline.notificationMinutesBefore ?? 0) * 60000);
-      if (now >= notifyTime && now <= dueTime) {
-        widget.classList.add('upcoming');
-      } else {
-        widget.classList.remove('upcoming');
-      }
-    } else {
-      widget.classList.remove('upcoming');
-    }
-
-    // update zIndex / transform
     const scales = [
       { translateY: 0, scale: 1.3, zIndex: 5 },
       { translateY: 4, scale: 1.15, zIndex: 4 },
@@ -146,10 +122,24 @@ function renderWidgets() {
       { translateY: 10, scale: 0.95, zIndex: 2 },
       { translateY: 12, scale: 0.85, zIndex: 1 }
     ];
-    const s = scales[index];
+    const s = scales[index] || scales[scales.length - 1];
     widget.style.transform = `translateY(${s.translateY}px) scale(${s.scale})`;
     widget.style.zIndex = s.zIndex;
+
+    // Toggle upcoming animation
+    if (deadline.notificationEnabled) {
+      const dueTime = new Date(deadline.dueAt);
+      const notifyTime = new Date(dueTime.getTime() - (deadline.notificationMinutesBefore ?? 0) * 60000);
+      widget.classList.toggle('upcoming', now >= notifyTime && now <= dueTime);
+    } else {
+      widget.classList.remove('upcoming');
+    }
+
+    delete existingWidgets[deadline.id];
   });
+
+  // Remove any leftover widgets
+  Object.values(existingWidgets).forEach(w => w.remove());
 }
 
 
@@ -271,6 +261,9 @@ function handleWidgetClick(e, widget) {
   widgetPopup.style.bottom = (window.innerHeight - rect.bottom + rect.height + 20) + 'px';
 
   widgetPopup.classList.add('show');
+  widgetPopup.classList.add('clickable');
+  widgetPopup.querySelectorAll('*').forEach(el => el.classList.add('clickable'));
+  attachClickableListeners(widgetPopup);
 }
 
 // ---- Mark complete ----
@@ -316,25 +309,26 @@ async function markAsComplete(deadlineId) {
 
     console.log('Response status:', response.status);
     console.log('Response ok:', response.ok);
-
     if (response.ok) {
-      console.log('Successfully marked as complete');
-
       doneText.textContent = 'Marked as done';
 
+      // Position the donePopup **just above the widget**
       const rect = activeWidget.getBoundingClientRect();
-      donePopup.style.left = (rect.left + rect.width / 2 + 60) + 'px';
-      donePopup.style.bottom = (window.innerHeight - rect.top + 100) + 'px';
+      donePopup.style.left = (rect.left + rect.width / 2) + 'px';
+      donePopup.style.bottom = (window.innerHeight - rect.top + rect.height + 10) + 'px'; // closer to widget
+      donePopup.style.transform = 'translateX(-50%)';
       donePopup.classList.add('show');
+      donePopup.classList.add('clickable');
+      donePopup.querySelectorAll('*').forEach(el => el.classList.add('clickable'));
 
+      // Slower fade
+      activeWidget.style.transition = 'opacity 1s, transform 1s';
       activeWidget.classList.add('fade-out');
 
       setTimeout(async () => {
-        console.log('Refreshing data and re-rendering widgets');
         await fetchData();
-        // renderWidgets(); not necessary; fetchData triggers it
         donePopup.classList.remove('show');
-      }, 500);
+      }, 1000); // wait 1s for fade
     } else {
       const errorText = await response.text();
       console.error('Failed to mark deadline as complete. Status:', response.status, 'Error:', errorText);
@@ -347,51 +341,23 @@ async function markAsComplete(deadlineId) {
 // ---- UI event wiring (confirm dialogs etc.) ----
 function setupPopupButtons() {
   const checkBox = document.getElementById('checkBox');
-  if (checkBox) {
-    checkBox.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const widgetPopup = document.getElementById('widgetPopup');
-      const confirmPopup = document.getElementById('confirmPopup');
+    if (checkBox) {
+      checkBox.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const widgetPopup = document.getElementById('widgetPopup');
 
-      widgetPopup.classList.add('blur');
+        // Hide the widget popup immediately
+        if (widgetPopup) {
+          widgetPopup.classList.remove('show');
+        }
 
-      const rect = widgetPopup.getBoundingClientRect();
-      confirmPopup.style.left = (rect.left + rect.width / 2) + 'px';
-      confirmPopup.style.bottom = (window.innerHeight - rect.top + 60) + 'px';
-      confirmPopup.style.transform = 'translateX(-50%)';
-      confirmPopup.classList.add('show');
-    });
-  }
+        if (!activeWidget) return;
 
-  const yesBtn = document.getElementById('yesBtn');
-  if (yesBtn) {
-    yesBtn.addEventListener('click', () => {
-      const confirmPopup = document.getElementById('confirmPopup');
-      const widgetPopup = document.getElementById('widgetPopup');
-
-      confirmPopup.classList.remove('show');
-      widgetPopup.classList.remove('blur');
-      widgetPopup.classList.remove('show');
-
-      if (activeWidget) {
         const deadlineId = parseInt(activeWidget.dataset.deadlineId, 10);
-        markAsComplete(deadlineId);
-      } else {
-        console.error('No active widget found');
-      }
-    });
-  }
+        await markAsComplete(deadlineId);
+      });
+    }
 
-  const noBtn = document.getElementById('noBtn');
-  if (noBtn) {
-    noBtn.addEventListener('click', () => {
-      const confirmPopup = document.getElementById('confirmPopup');
-      const widgetPopup = document.getElementById('widgetPopup');
-
-      confirmPopup.classList.remove('show');
-      widgetPopup.classList.remove('blur');
-    });
-  }
 
   // document click closes popups
   document.addEventListener('click', (e) => {
