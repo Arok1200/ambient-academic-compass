@@ -227,6 +227,16 @@ function updateCurrentTime() {
   currentTimeMarker.classList.toggle('upcoming', shouldGlow);
 }
 
+function updateTimelineColors(backgroundColor, borderColor) {
+  const timelineBars = document.querySelectorAll('.timeline-bar');
+  timelineBars.forEach(bar => {
+    bar.style.background = backgroundColor;
+    if (borderColor) {
+      bar.style.border = `2px solid ${borderColor}`;
+    }
+  });
+}
+
 
 
 function handleWidgetClick(e, widget) {
@@ -558,11 +568,29 @@ function loadSettings() {
   // Load from localStorage
   const widgetsEnabled = localStorage.getItem('widgetsEnabled');
   const progressBarEnabled = localStorage.getItem('progressBarEnabled');
+  const progressBarColorIndex = localStorage.getItem('progressBarColorIndex');
   
   applySettings({
     widgetsEnabled: widgetsEnabled !== null ? JSON.parse(widgetsEnabled) : true,
     progressBarEnabled: progressBarEnabled !== null ? JSON.parse(progressBarEnabled) : true
   });
+  
+  // Apply saved color if available
+  if (progressBarColorIndex !== null) {
+    const PROGRESS_BAR_COLORS = [
+      { color: 'linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)', border: 'rgba(255,255,255,0.9)' },
+      { color: 'linear-gradient(90deg, rgba(243,177,209,0.7) 0%, rgba(243,177,209,0.5) 100%)', border: '#cc5d97' },
+      { color: 'linear-gradient(90deg, rgba(189,189,189,0.7) 0%, rgba(189,189,189,0.5) 100%)', border: '#a1a1a1' },
+      { color: 'linear-gradient(90deg, rgba(111,207,151,0.7) 0%, rgba(111,207,151,0.5) 100%)', border: '#5baa52' },
+      { color: 'linear-gradient(90deg, rgba(178,152,245,0.7) 0%, rgba(178,152,245,0.5) 100%)', border: '#8b6dc9' },
+      { color: 'linear-gradient(90deg, rgba(154,209,227,0.7) 0%, rgba(154,209,227,0.5) 100%)', border: '#3aa6b0' },
+    ];
+    const index = parseInt(progressBarColorIndex, 10);
+    if (index >= 0 && index < PROGRESS_BAR_COLORS.length) {
+      const color = PROGRESS_BAR_COLORS[index];
+      updateTimelineColors(color.color, color.border);
+    }
+  }
 }
 
 // ---- Bootstrapping ----
@@ -585,6 +613,19 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.setItem('progressBarEnabled', JSON.stringify(settings.progressBarEnabled));
         }
         applySettings(settings);
+      });
+    }
+    
+    // Listen for color updates from main app
+    if (isElectron && window.electronAPI && window.electronAPI.onUpdateColors) {
+      window.electronAPI.onUpdateColors((colors) => {
+        console.log('Received color update:', colors);
+        if (colors.colorIndex !== undefined) {
+          localStorage.setItem('progressBarColorIndex', colors.colorIndex.toString());
+        }
+        if (colors.backgroundColor && colors.borderColor) {
+          updateTimelineColors(colors.backgroundColor, colors.borderColor);
+        }
       });
     }
     

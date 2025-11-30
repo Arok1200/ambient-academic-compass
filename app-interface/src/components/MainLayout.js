@@ -245,6 +245,15 @@ function MainLayout({ children }) {
     
     const currentColor = progressBarColors[nextIndex];
     updateProgressBarColor(currentColor.color, currentColor.border);
+    
+    // Send to desktop overlay via Electron IPC
+    if (window.electronAPI && window.electronAPI.updateDesktopColors) {
+      window.electronAPI.updateDesktopColors({
+        colorIndex: nextIndex,
+        backgroundColor: currentColor.color,
+        borderColor: currentColor.border
+      });
+    }
   };
 
   const updateProgressBarColor = (backgroundColor, borderColor) => {
