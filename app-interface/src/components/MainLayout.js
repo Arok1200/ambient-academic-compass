@@ -353,6 +353,12 @@ function MainLayout({ children }) {
     return (totalMinutes / 1440) * 100;
   };
 
+  const getCurrentProgressPercent = () => {
+    const now = new Date();
+    const minutesSinceMidnight = now.getHours() * 60 + now.getMinutes();
+    return (minutesSinceMidnight / 1440) * 100; // 1440 = minutes in a day
+  };
+
   const upcomingDeadlines = getUpcomingDeadlines();
   const todayEvents = getTodayEvents();
 
@@ -497,6 +503,7 @@ function MainLayout({ children }) {
                           border: getCurrentProgressBarColor().border ? `2px solid ${getCurrentProgressBarColor().border}` : 'none'
                         }}
                       >
+                        <div className="timeline-passed" style={{ width: `${getCurrentProgressPercent()}%` }}></div>
                         <div 
                           className="current-time-bubble"
                           style={{ left: `${getCurrentTimePosition()}%` }}

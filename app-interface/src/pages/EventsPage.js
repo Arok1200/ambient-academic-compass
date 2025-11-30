@@ -71,15 +71,18 @@ export default function EventsPage() {
     }
   };
 
-  // Filter events by selected date
-  const eventsForSelectedDay = events.filter((event) => {
+  // Filter events by selected date and sort by earliest start time
+const eventsForSelectedDay = events
+  .filter((event) => {
     const eventDate = new Date(event.startTime);
     return (
       eventDate.getFullYear() === selectedDate.getFullYear() &&
       eventDate.getMonth() === selectedDate.getMonth() &&
       eventDate.getDate() === selectedDate.getDate()
     );
-  });
+  })
+  .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
 
   // Format date/time text
   const formatDateTime = (startTime, endTime) => {
