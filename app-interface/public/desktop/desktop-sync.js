@@ -217,6 +217,16 @@ function updateCurrentTime() {
   currentTimeMarker.classList.toggle('upcoming', shouldGlow);
 }
 
+function updateTimelineColors(backgroundColor, borderColor) {
+  const timelineBars = document.querySelectorAll('.timeline-bar');
+  timelineBars.forEach(bar => {
+    bar.style.background = backgroundColor;
+    if (borderColor) {
+      bar.style.border = `2px solid ${borderColor}`;
+    }
+  });
+}
+
 
 
 function handleWidgetClick(e, widget) {
@@ -478,9 +488,113 @@ function initOverlayBehavior() {
   });
 }
 
+// ---- Platform-specific positioning ----
+function adjustPlatformPositioning() {
+  // Detect platform - macOS needs more space from bottom (dock is hidden from CSS calculations)
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  
+  if (isMac) {
+    // Adjust widgets dock
+    const dock = document.getElementById('widgetDock');
+    if (dock) dock.style.bottom = '130px'; // Default is 30px
+    
+    // Adjust timeline container
+    const timeline = document.getElementById('timeline');
+    if (timeline) timeline.style.bottom = '120px'; // Default is 20px
+    
+    // Adjust time labels (now below the bar)
+    const timeLabels = document.querySelector('.time-labels');
+    if (timeLabels) timeLabels.style.bottom = '80px'; // Default is 0px (below bar)
+  }
+}
+
+// ---- Settings synchronization ----
+function applySettings(settings) {
+  const dock = document.getElementById('widgetDock');
+  const timeline = document.getElementById('timeline');
+  const timeLabels = document.querySelector('.time-labels');
+  
+  if (settings.widgetsEnabled !== undefined) {
+    if (dock) {
+      dock.style.display = settings.widgetsEnabled ? 'flex' : 'none';
+    }
+  }
+  
+  if (settings.progressBarEnabled !== undefined) {
+    if (timeline) {
+      timeline.style.display = settings.progressBarEnabled ? 'block' : 'none';
+    }
+    if (timeLabels) {
+      timeLabels.style.display = settings.progressBarEnabled ? 'flex' : 'none';
+    }
+  }
+}
+
+function loadSettings() {
+  // Load from localStorage
+  const widgetsEnabled = localStorage.getItem('widgetsEnabled');
+  const progressBarEnabled = localStorage.getItem('progressBarEnabled');
+  const progressBarColorIndex = localStorage.getItem('progressBarColorIndex');
+  
+  applySettings({
+    widgetsEnabled: widgetsEnabled !== null ? JSON.parse(widgetsEnabled) : true,
+    progressBarEnabled: progressBarEnabled !== null ? JSON.parse(progressBarEnabled) : true
+  });
+  
+  // Apply saved color if available
+  if (progressBarColorIndex !== null) {
+    const PROGRESS_BAR_COLORS = [
+      { color: 'linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)', border: 'rgba(255,255,255,0.9)' },
+      { color: 'linear-gradient(90deg, rgba(243,177,209,0.7) 0%, rgba(243,177,209,0.5) 100%)', border: '#cc5d97' },
+      { color: 'linear-gradient(90deg, rgba(189,189,189,0.7) 0%, rgba(189,189,189,0.5) 100%)', border: '#a1a1a1' },
+      { color: 'linear-gradient(90deg, rgba(111,207,151,0.7) 0%, rgba(111,207,151,0.5) 100%)', border: '#5baa52' },
+      { color: 'linear-gradient(90deg, rgba(178,152,245,0.7) 0%, rgba(178,152,245,0.5) 100%)', border: '#8b6dc9' },
+      { color: 'linear-gradient(90deg, rgba(154,209,227,0.7) 0%, rgba(154,209,227,0.5) 100%)', border: '#3aa6b0' },
+    ];
+    const index = parseInt(progressBarColorIndex, 10);
+    if (index >= 0 && index < PROGRESS_BAR_COLORS.length) {
+      const color = PROGRESS_BAR_COLORS[index];
+      updateTimelineColors(color.color, color.border);
+    }
+  }
+}
+
 // ---- Bootstrapping ----
 document.addEventListener('DOMContentLoaded', () => {
   try {
+    // Adjust positions based on platform
+    adjustPlatformPositioning();
+    
+    // Load and apply settings
+    loadSettings();
+    
+    // Listen for settings updates from main app
+    if (isElectron && window.electronAPI && window.electronAPI.onUpdateSettings) {
+      window.electronAPI.onUpdateSettings((settings) => {
+        // Also update localStorage so it persists
+        if (settings.widgetsEnabled !== undefined) {
+          localStorage.setItem('widgetsEnabled', JSON.stringify(settings.widgetsEnabled));
+        }
+        if (settings.progressBarEnabled !== undefined) {
+          localStorage.setItem('progressBarEnabled', JSON.stringify(settings.progressBarEnabled));
+        }
+        applySettings(settings);
+      });
+    }
+    
+    // Listen for color updates from main app
+    if (isElectron && window.electronAPI && window.electronAPI.onUpdateColors) {
+      window.electronAPI.onUpdateColors((colors) => {
+        console.log('Received color update:', colors);
+        if (colors.colorIndex !== undefined) {
+          localStorage.setItem('progressBarColorIndex', colors.colorIndex.toString());
+        }
+        if (colors.backgroundColor && colors.borderColor) {
+          updateTimelineColors(colors.backgroundColor, colors.borderColor);
+        }
+      });
+    }
+    
     // initial UI wiring
     setupPopupButtons();
 
