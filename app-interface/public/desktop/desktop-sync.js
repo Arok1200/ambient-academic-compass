@@ -517,15 +517,18 @@ function applySettings(settings) {
   if (settings.widgetsEnabled !== undefined) {
     if (dock) {
       dock.style.display = settings.widgetsEnabled ? 'flex' : 'none';
+      dock.style.pointerEvents = settings.widgetsEnabled ? 'auto' : 'none';
     }
   }
   
   if (settings.progressBarEnabled !== undefined) {
     if (timeline) {
       timeline.style.display = settings.progressBarEnabled ? 'block' : 'none';
+      timeline.style.pointerEvents = settings.progressBarEnabled ? 'auto' : 'none';
     }
     if (timeLabels) {
       timeLabels.style.display = settings.progressBarEnabled ? 'flex' : 'none';
+      timeLabels.style.pointerEvents = settings.progressBarEnabled ? 'auto' : 'none';
     }
   }
 }
