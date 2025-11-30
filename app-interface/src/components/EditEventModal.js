@@ -39,6 +39,15 @@ export default function EditEventModal({ event, onClose, onSubmit }) {
     onSubmit(updatedEvent);
   };
 
+  const handleDismissNotification = () => {
+    const updatedEvent = {
+      ...event,
+      notificationEnabled: false,
+      notificationMinutesBefore: null,
+    };
+    onSubmit(updatedEvent);
+  };
+
   return (
     <div className="event-modal-overlay">
       <div className="event-modal">
@@ -129,6 +138,19 @@ export default function EditEventModal({ event, onClose, onSubmit }) {
           <button className="cancel" onClick={onClose}>
             Cancel
           </button>
+          {event.notificationEnabled && (
+            <button 
+              className="dismiss-notification" 
+              onClick={handleDismissNotification}
+              style={{
+                backgroundColor: '#ff9800',
+                color: 'white',
+                marginLeft: '10px'
+              }}
+            >
+              Dismiss Notification
+            </button>
+          )}
         </div>
       </div>
     </div>
