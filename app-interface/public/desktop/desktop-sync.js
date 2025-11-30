@@ -217,6 +217,34 @@ function updateCurrentTime() {
   currentTimeMarker.classList.toggle('upcoming', shouldGlow);
 }
 
+// Dismiss all glowing notifications when circle is clicked
+async function dismissActiveNotifications() {
+  const now = new Date();
+  const eventsToUpdate = events.filter(event => {
+    if (!event.notificationEnabled) return false;
+    const eventStart = new Date(event.startTime);
+    const notifyTime = new Date(eventStart.getTime() - (event.notificationMinutesBefore ?? 0) * 60000);
+    return now >= notifyTime && now <= eventStart;
+  });
+
+  // Disable notifications for all glowing events
+  for (const event of eventsToUpdate) {
+    try {
+      const updated = { ...event, notificationEnabled: false, notificationMinutesBefore: null };
+      await fetch(`${API_BASE}/events/${event.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated)
+      });
+    } catch (err) {
+      console.error('Failed to dismiss notification for event:', event.id, err);
+    }
+  }
+
+  // Refresh data to update UI
+  await fetchData();
+}
+
 function updateTimelineColors(backgroundColor, borderColor) {
   const timelineBars = document.querySelectorAll('.timeline-bar');
   timelineBars.forEach(bar => {
@@ -600,6 +628,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // initial UI wiring
     setupPopupButtons();
+
+    // Add click handler to current time marker for dismissing notifications
+    const currentTimeMarker = document.getElementById('currentTime');
+    if (currentTimeMarker) {
+      // Enable mouse events when hovering over glowing circle
+      currentTimeMarker.addEventListener('mouseenter', () => {
+        if (currentTimeMarker.classList.contains('upcoming')) {
+          scheduleAcceptMouse(true, 25);
+        }
+      });
+
+      currentTimeMarker.addEventListener('mouseleave', () => {
+        if (currentTimeMarker.classList.contains('upcoming')) {
+          scheduleAcceptMouse(false, 120);
+        }
+      });
+
+      currentTimeMarker.addEventListener('mousedown', () => {
+        if (currentTimeMarker.classList.contains('upcoming')) {
+          scheduleAcceptMouse(true, 0);
+        }
+      });
+
+      currentTimeMarker.addEventListener('click', async () => {
+        if (currentTimeMarker.classList.contains('upcoming')) {
+          await dismissActiveNotifications();
+        }
+      });
+    }
 
     // Fetch & render initial data
     fetchData();
