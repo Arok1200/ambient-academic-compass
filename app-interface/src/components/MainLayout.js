@@ -25,8 +25,14 @@ import HelpModal from './HelpModal';
 
 function MainLayout({ children }) {
   const [profilePic, setProfilePic] = useState(null);
-  const [widgetsEnabled, setWidgetsEnabled] = useState(true);
-  const [progressBarEnabled, setProgressBarEnabled] = useState(true);
+  const [widgetsEnabled, setWidgetsEnabled] = useState(() => {
+    const saved = localStorage.getItem('widgetsEnabled');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [progressBarEnabled, setProgressBarEnabled] = useState(() => {
+    const saved = localStorage.getItem('progressBarEnabled');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const [progressBarColorIndex, setProgressBarColorIndex] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -210,11 +216,25 @@ function MainLayout({ children }) {
   };
 
   const handleToggleWidgets = () => {
-    setWidgetsEnabled(!widgetsEnabled);
+    const newState = !widgetsEnabled;
+    setWidgetsEnabled(newState);
+    localStorage.setItem('widgetsEnabled', JSON.stringify(newState));
+    
+    // Sync with desktop overlay if in Electron
+    if (window.electronAPI && window.electronAPI.updateDesktopSettings) {
+      window.electronAPI.updateDesktopSettings({ widgetsEnabled: newState });
+    }
   };
 
   const handleToggleProgressBar = () => {
-    setProgressBarEnabled(!progressBarEnabled);
+    const newState = !progressBarEnabled;
+    setProgressBarEnabled(newState);
+    localStorage.setItem('progressBarEnabled', JSON.stringify(newState));
+    
+    // Sync with desktop overlay if in Electron
+    if (window.electronAPI && window.electronAPI.updateDesktopSettings) {
+      window.electronAPI.updateDesktopSettings({ progressBarEnabled: newState });
+    }
   };
 
   const handleChangeProgressBarColor = () => {

@@ -25,6 +25,8 @@ function createMainWindow() {
     mainWindow.loadFile(path.join(__dirname, '../build/index.html'));
   }
 
+  // No automatic show/hide - we'll handle this in toggleDesktopWidgets
+
   // Prevent app from quitting when main window is closed (we might be in desktop mode)
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -72,29 +74,23 @@ function createDesktopOverlay() {
   // Ensure truly transparent background
   desktopOverlay.setBackgroundColor('#00000000');
 
-  // Make it truly ambient across all workspaces and apps
-  desktopOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-  desktopOverlay.setAlwaysOnTop(true, 'screen-saver', 1);
-  // Show overlay
+  // Configure for all workspaces BEFORE showing
+  if (process.platform === 'darwin') {
+    // macOS-specific: Apply all settings before showing
+    desktopOverlay.setFullScreenable(false);
+    desktopOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    // Use 'floating' level to keep it above normal windows but below modals
+    desktopOverlay.setAlwaysOnTop(true, 'floating', 1);
+  } else {
+    // Other platforms
+    desktopOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    desktopOverlay.setAlwaysOnTop(true, 'floating', 1);
+  }
+  
   desktopOverlay.setIgnoreMouseEvents(true, { forward: true });
   
-  // Additional macOS-specific settings for maximum ambient visibility
-  if (process.platform === 'darwin') {
-    try {
-      // Use newer method for better workspace persistence
-      desktopOverlay.setWindowLevel && desktopOverlay.setWindowLevel('screen-saver');
-      // Ensure it appears on all workspaces and full-screen apps
-      desktopOverlay.setFullScreenable(false);
-      desktopOverlay.setVisibleOnAllWorkspaces(true, { 
-        visibleOnFullScreen: true,
-        skipTransformProcessType: true 
-      });
-    } catch (e) {
-      // setWindowLevel might not be available
-    }
-    // Ensure it doesn't interfere with other windows
-    //desktopOverlay.setIgnoreMouseEvents(false);
-  }
+  // Show the overlay after all settings are configured
+  desktopOverlay.show();
 
   // Prevent the overlay from ever being hidden
   desktopOverlay.on('hide', () => {
@@ -129,7 +125,7 @@ function enforceAmbientVisibility() {
         desktopOverlay.show();
       }
       if (!desktopOverlay.isAlwaysOnTop()) {
-        desktopOverlay.setAlwaysOnTop(true, 'screen-saver', 1);
+        desktopOverlay.setAlwaysOnTop(true, 'floating', 1);
       }
       desktopOverlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     } catch (e) {
@@ -140,23 +136,29 @@ function enforceAmbientVisibility() {
 
 function toggleDesktopWidgets() {
   if (isInDesktopMode) {
-    // Exit desktop mode - close overlay and show main window
+    // Exit desktop mode - show main window and hide overlay
     isInDesktopMode = false;
     if (ambientVisibilityTimer) {
       clearInterval(ambientVisibilityTimer);
       ambientVisibilityTimer = null;
     }
-    if (desktopOverlay) {
-      desktopOverlay.close();
-      desktopOverlay = null;
+    // Hide the overlay when showing main window
+    if (desktopOverlay && !desktopOverlay.isDestroyed()) {
+      desktopOverlay.hide();
     }
-    if (!mainWindow) {
+    if (!mainWindow || mainWindow.isDestroyed()) {
       createMainWindow();
     } else {
       mainWindow.show();
+      mainWindow.focus();
+      mainWindow.moveTop();
+      // Ensure window is clickable
+      if (process.platform === 'darwin') {
+        app.focus({ steal: true });
+      }
     }
   } else {
-    // Enter desktop mode - close main window and show overlay
+    // Enter desktop mode - close main window and show overlay on all desktops
     isInDesktopMode = true;
     if (mainWindow) {
       mainWindow.hide();
@@ -173,11 +175,23 @@ function toggleDesktopWidgets() {
 }
 
 function createSystemTray() {
-  // Create a simple tray menu
+  // Create a system tray icon (macOS compatible)
+  let trayIcon;
   try {
-    tray = new Tray(path.join(__dirname, '../public/favicon.ico'));
+    // Use tray.png (32x32 PNG optimized for macOS menu bar)
+    const iconPath = path.join(__dirname, '../public/tray.png');
+    trayIcon = nativeImage.createFromPath(iconPath);
+    
+    // On macOS, mark as template for automatic dark/light mode adaptation
+    if (process.platform === 'darwin') {
+      trayIcon.setTemplateImage(true);
+    }
+    
+    tray = new Tray(trayIcon);
+    tray.setIgnoreDoubleClickEvents(true);
   } catch (e) {
-    // If favicon doesn't exist, create without icon
+    console.error('Failed to load tray icon:', e);
+    // Fallback to a simple dot
     tray = new Tray(nativeImage.createEmpty());
   }
   
@@ -187,10 +201,17 @@ function createSystemTray() {
       click: () => {
         if (isInDesktopMode) {
           toggleDesktopWidgets(); // Switch back to main window
-        } else if (mainWindow) {
-          mainWindow.show();
         } else {
-          createMainWindow();
+          // Hide overlay if it's showing
+          if (desktopOverlay && !desktopOverlay.isDestroyed()) {
+            desktopOverlay.hide();
+          }
+          if (mainWindow) {
+            mainWindow.show();
+            mainWindow.focus();
+          } else {
+            createMainWindow();
+          }
         }
       },
     },
@@ -232,6 +253,14 @@ ipcMain.on("overlay-accept-events", (event, accept) => {
       console.error("Failed to set overlay ignoreMouseEvents:", err);
     }
   }
+});
+
+// Handle desktop settings updates (widgets/progress bar enable/disable)
+ipcMain.handle('update-desktop-settings', async (event, settings) => {
+  if (desktopOverlay && !desktopOverlay.isDestroyed()) {
+    desktopOverlay.webContents.send('update-settings', settings);
+  }
+  return true;
 });
 
 // App Event Handlers

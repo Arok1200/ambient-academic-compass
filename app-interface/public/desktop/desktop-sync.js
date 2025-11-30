@@ -512,9 +512,82 @@ function initOverlayBehavior() {
   });
 }
 
+// ---- Platform-specific positioning ----
+function adjustPlatformPositioning() {
+  // Detect platform - macOS needs more space from bottom (dock is hidden from CSS calculations)
+  const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+  
+  if (isMac) {
+    // Adjust widgets dock
+    const dock = document.getElementById('widgetDock');
+    if (dock) dock.style.bottom = '130px'; // Default is 30px
+    
+    // Adjust timeline container
+    const timeline = document.getElementById('timeline');
+    if (timeline) timeline.style.bottom = '120px'; // Default is 20px
+    
+    // Adjust time labels (now below the bar)
+    const timeLabels = document.querySelector('.time-labels');
+    if (timeLabels) timeLabels.style.bottom = '80px'; // Default is 0px (below bar)
+  }
+}
+
+// ---- Settings synchronization ----
+function applySettings(settings) {
+  const dock = document.getElementById('widgetDock');
+  const timeline = document.getElementById('timeline');
+  const timeLabels = document.querySelector('.time-labels');
+  
+  if (settings.widgetsEnabled !== undefined) {
+    if (dock) {
+      dock.style.display = settings.widgetsEnabled ? 'flex' : 'none';
+    }
+  }
+  
+  if (settings.progressBarEnabled !== undefined) {
+    if (timeline) {
+      timeline.style.display = settings.progressBarEnabled ? 'block' : 'none';
+    }
+    if (timeLabels) {
+      timeLabels.style.display = settings.progressBarEnabled ? 'flex' : 'none';
+    }
+  }
+}
+
+function loadSettings() {
+  // Load from localStorage
+  const widgetsEnabled = localStorage.getItem('widgetsEnabled');
+  const progressBarEnabled = localStorage.getItem('progressBarEnabled');
+  
+  applySettings({
+    widgetsEnabled: widgetsEnabled !== null ? JSON.parse(widgetsEnabled) : true,
+    progressBarEnabled: progressBarEnabled !== null ? JSON.parse(progressBarEnabled) : true
+  });
+}
+
 // ---- Bootstrapping ----
 document.addEventListener('DOMContentLoaded', () => {
   try {
+    // Adjust positions based on platform
+    adjustPlatformPositioning();
+    
+    // Load and apply settings
+    loadSettings();
+    
+    // Listen for settings updates from main app
+    if (isElectron && window.electronAPI && window.electronAPI.onUpdateSettings) {
+      window.electronAPI.onUpdateSettings((settings) => {
+        // Also update localStorage so it persists
+        if (settings.widgetsEnabled !== undefined) {
+          localStorage.setItem('widgetsEnabled', JSON.stringify(settings.widgetsEnabled));
+        }
+        if (settings.progressBarEnabled !== undefined) {
+          localStorage.setItem('progressBarEnabled', JSON.stringify(settings.progressBarEnabled));
+        }
+        applySettings(settings);
+      });
+    }
+    
     // initial UI wiring
     setupPopupButtons();
 

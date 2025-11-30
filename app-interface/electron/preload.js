@@ -21,5 +21,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
     });
   },
 
+  // Update desktop settings (widgets/progress bar enabled/disabled)
+  updateDesktopSettings: (settings) => {
+    return ipcRenderer.invoke('update-desktop-settings', settings);
+  },
+
+  // Listen for settings updates in the desktop overlay
+  onUpdateSettings: (callback) => {
+    ipcRenderer.on('update-settings', (event, settings) => {
+      callback(settings);
+    });
+  },
+
   setOverlayAcceptsMouse: (accept) => ipcRenderer.send('overlay-accept-events', accept)
 });
