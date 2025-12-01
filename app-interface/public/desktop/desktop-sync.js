@@ -575,12 +575,25 @@ function loadSettings() {
   // Apply saved color if available
   if (progressBarColorIndex !== null) {
     const PROGRESS_BAR_COLORS = [
-      { color: 'linear-gradient(90deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.5) 100%)', border: 'rgba(255,255,255,0.9)' },
-      { color: 'linear-gradient(90deg, rgba(243,177,209,0.7) 0%, rgba(243,177,209,0.5) 100%)', border: '#cc5d97' },
-      { color: 'linear-gradient(90deg, rgba(189,189,189,0.7) 0%, rgba(189,189,189,0.5) 100%)', border: '#a1a1a1' },
-      { color: 'linear-gradient(90deg, rgba(111,207,151,0.7) 0%, rgba(111,207,151,0.5) 100%)', border: '#5baa52' },
-      { color: 'linear-gradient(90deg, rgba(178,152,245,0.7) 0%, rgba(178,152,245,0.5) 100%)', border: '#8b6dc9' },
-      { color: 'linear-gradient(90deg, rgba(154,209,227,0.7) 0%, rgba(154,209,227,0.5) 100%)', border: '#3aa6b0' },
+      { color: '#ffffff', border: '#333333' }, { color: '#e5e5e5', border: '#999999' },
+      { color: '#FFF9C4', border: '#ccca9d' }, { color: '#FFCCBC', border: '#cca295' },
+      { color: '#C8E6C9', border: '#a1b8a2' }, { color: '#BBDEFB', border: '#95b1cb' },
+      { color: '#F8BBD0', border: '#c995a6' }, { color: '#E1BEE7', border: '#b598ba' },
+      { color: '#0066ff', border: '#004499' }, { color: '#00ff66', border: '#00cc52' },
+      { color: '#ffb6c1', border: '#cc9199' }, { color: '#9892ff', border: '#7b75cc' },
+      { color: '#00ffff', border: '#00cccc' }, { color: '#ccff00', border: '#a6cc00' },
+      { color: '#ff00ff', border: '#cc00cc' }, { color: '#ffff00', border: '#cccc00' },
+      { color: '#4169e1', border: '#2854b4' }, { color: '#228b22', border: '#1b6b1b' },
+      { color: '#87ceeb', border: '#6ba6cd' }, { color: '#98fb98', border: '#7bc97b' },
+      { color: '#dda0dd', border: '#b87db8' }, { color: '#F3B1D1', border: '#cc5d97' },
+      { color: '#BDBDBD', border: '#a1a1a1' }, { color: '#6FCF97', border: '#5baa52' },
+      { color: '#B298F5', border: '#8b6dc9' }, { color: '#9AD1E3', border: '#3aa6b0' },
+      { color: '#c0c0c0', border: '#999999' }, { color: '#ffd700', border: '#ccac00' },
+      { color: '#ffa500', border: '#cc8400' }, { color: '#40e0d0', border: '#33b3a6' },
+      { color: '#8a2be2', border: '#6b22b5' }, { color: '#00ff7f', border: '#00cc66' },
+      { color: '#00bfff', border: '#0099cc' }, { color: '#ba55d3', border: '#9444a6' },
+      { color: '#7fffd4', border: '#66cca7' }, { color: '#8a2be2', border: '#6b22b5' },
+      { color: '#7fff00', border: '#66cc00' }
     ];
     const index = parseInt(progressBarColorIndex, 10);
     if (index >= 0 && index < PROGRESS_BAR_COLORS.length) {
@@ -609,7 +622,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (settings.progressBarEnabled !== undefined) {
           localStorage.setItem('progressBarEnabled', JSON.stringify(settings.progressBarEnabled));
         }
+        // Persist color if provided
+        if (settings.progressBarColor !== undefined) {
+          localStorage.setItem('progressBarColor', settings.progressBarColor);
+        }
+        if (settings.progressBarBorder !== undefined) {
+          localStorage.setItem('progressBarBorder', settings.progressBarBorder);
+        }
         applySettings(settings);
+
+        const timeline = document.getElementById('timeline'); // the container
+        if (timeline) {
+          if (settings.progressBarColor) timeline.style.backgroundColor = settings.progressBarColor;
+          if (settings.progressBarBorder) timeline.style.borderColor = settings.progressBarBorder;
+        }
       });
     }
     
