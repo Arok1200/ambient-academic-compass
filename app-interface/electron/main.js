@@ -35,6 +35,20 @@ function createMainWindow() {
     }
   });
 
+  mainWindow.on('focus', () => {
+    if (desktopOverlay && !desktopOverlay.isDestroyed()) {
+      desktopOverlay.close();
+      desktopOverlay = null;
+    }
+
+    isInDesktopMode = false;
+
+    if (ambientVisibilityTimer) {
+      clearInterval(ambientVisibilityTimer);
+      ambientVisibilityTimer = null;
+    }
+  });
+
   return mainWindow;
 }
 
@@ -56,7 +70,7 @@ function createDesktopOverlay() {
     movable: false,
     minimizable: false,
     maximizable: false,
-    closable: false,
+    //closable: false,
     focusable: false,
     hasShadow: false,
     backgroundColor: '#00000000', // Fully transparent
@@ -143,8 +157,10 @@ function toggleDesktopWidgets() {
       ambientVisibilityTimer = null;
     }
     // Hide the overlay when showing main window
-    if (desktopOverlay && !desktopOverlay.isDestroyed()) {
-      desktopOverlay.hide();
+    if (desktopOverlay) {
+      desktopOverlay.close();
+      desktopOverlay = null;
+
     }
     if (!mainWindow || mainWindow.isDestroyed()) {
       createMainWindow();
@@ -161,13 +177,9 @@ function toggleDesktopWidgets() {
     // Enter desktop mode - close main window and show overlay on all desktops
     isInDesktopMode = true;
     if (mainWindow) {
-      mainWindow.hide();
+      mainWindow.minimize();
     }
-    if (!desktopOverlay) {
-      createDesktopOverlay();
-    } else {
-      desktopOverlay.show();
-    }
+    createDesktopOverlay();
     
     // Start ambient visibility enforcement - check every 2 seconds
     ambientVisibilityTimer = setInterval(enforceAmbientVisibility, 2000);
